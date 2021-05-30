@@ -1,0 +1,32 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "tatasky",
+            "database": "tatasky",
+            "username": "root",
+            "password": "krishnan"
+        },
+        {
+            "mssqlOptions": {
+                "appName": "SQLTools",
+                "useUTC": true,
+                "encrypt": true
+            },
+            "previewLimit": 50,
+            "server": "edit-pc",
+            "port": 1433,
+            "driver": "MSSQL",
+            "name": "Digitals",
+            "database": "Quality2014",
+            "username": "sa",
+            "password": "krishnan"
+        }
+    ]
+}
