@@ -27,6 +27,7 @@ enum MOTORSTATE {ON, OFF};
 MOTORSTATE MotorState;
 byte tx[4];
 int counter = 0;
+//dat
 
 class MySwitch {
   private:
