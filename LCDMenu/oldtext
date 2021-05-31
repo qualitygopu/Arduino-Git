@@ -1,0 +1,433 @@
+void loop() {
+  if (irrecv.decode(&results)){
+    Serial.println(results.value);
+    switch (results.value)
+    {
+    case 12583001:             //down
+
+      menu++;
+      updateMenu();
+      delay(300);
+      break;
+    case 12583000:            //up
+      menu--;
+      updateMenu();
+      delay(300);
+      break;
+    case 12583004:            //select
+      executeAction();
+      //updateMenu();
+      delay(300);
+      break;
+    }
+    irrecv.resume();
+  }
+}
+
+void updateMenu() {
+  switch (menu) {
+    case 0:
+      menu = 1;
+      break;
+    case 1:
+      lcd.clear();
+      lcd.print(">SET DATE");
+      lcd.setCursor(0, 1);
+      lcd.print(" SET TIME");
+      break;
+    case 2:
+      lcd.clear();
+      lcd.print(" SET DATE");
+      lcd.setCursor(0, 1);
+      lcd.print(">SET TIME");
+      break;
+    case 3:
+      lcd.clear();
+      lcd.print(">LOAD1 ON TIME");
+      lcd.setCursor(0, 1);
+      lcd.print(" LOAD1 OFF TIME");
+      break;
+    case 4:
+      lcd.clear();
+      lcd.print(" LOAD1 ON TIME");
+      lcd.setCursor(0, 1);
+      lcd.print(">LOAD1 OFF TIME");
+      break;
+    case 5:
+      lcd.clear();
+      lcd.print(">LOAD2 ON TIME");
+      lcd.setCursor(0, 1);
+      lcd.print(" LOAD2 OFF TIME");
+      break;
+    case 6:
+      lcd.clear();
+      lcd.print(" LOAD2 ON TIME");
+      lcd.setCursor(0, 1);
+      lcd.print(">LOAD2 OFF TIME");
+      break;
+      break;
+    case 7:
+      menu = 6;
+      break;
+  }
+}
+
+void executeAction() {
+  switch (menu) {
+    case 1:
+      setDate();
+      break;
+    case 2:
+      action2();
+      break;
+    case 3:
+      action3();
+      break;
+    case 4:
+      action4();
+      break;
+    case 5:
+      action5();
+      break;
+    case 6:
+      action6();
+      break;
+
+  }
+}
+
+int curs = 0, submenu = 1;
+void setDate() {
+  DateTime tmpDate = now;
+  int i = 1; 
+  uint8_t dd=0;
+  uint8_t mm=0;
+  uint16_t yy=0;
+  submenu = 1;
+  setDatePage();
+  do
+  {
+    if (irrecv.decode(&results))
+    {
+      if (results.value == 12583001)
+      {
+        submenu++;
+        setDatePage();
+        delay(300);
+      }
+      if (results.value == 12583000)
+      {
+        submenu--;
+        setDatePage();
+        delay(300);
+      }
+      if (results.value == 12583004) // select
+      { 
+      delay(300);
+      }
+      if (results.value == 12582998)  // back
+      { 
+        //goto backtomain;
+        delay(300);
+      }
+      
+      if (submenu == 1)
+      {
+        
+        int but = Contain(IRnum,results.value);
+        if (but != -1) 
+        {
+          Serial.println(i);
+          Serial.println("but " + String(but));
+          if (i == 9) {
+            submenu = 2;
+            i = 1;
+          }
+          if (i == 1)
+          {
+            dd = but;
+            now=DateTime(DateTime(now.year(), now.month(), dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          if (i == 2)
+          {
+            dd =(dd*10) + but;
+            now=DateTime(DateTime(now.year(), now.month(), dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          if (i == 3)
+          {
+            mm = but;
+            now=DateTime(DateTime(now.year(), mm, dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          if (i == 4)
+          {
+            mm =(mm*10) + but;
+            now=DateTime(DateTime(now.year(), mm, dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          if (i == 5)
+          {
+            yy = but;
+            now=DateTime(DateTime(yy, mm, dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          if (i == 6)
+          {
+            yy =(yy*10) + but;
+            now=DateTime(DateTime(yy, mm, dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          if (i == 7)
+          {
+            yy =(yy*10) + but;
+            now=DateTime(DateTime(yy, mm, dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          if (i == 8)
+          {
+            yy =(yy*10) + but;
+            now=DateTime(DateTime(yy, mm, dd, now.hour(), now.minute(), now.second()));
+            goto setdat;
+          }
+          setdat:
+            setDatePage();
+            i++;
+        }
+        delay(300);
+      }
+     irrecv.resume();
+    }
+  } while(1);
+backtomain:
+  Serial.println("exit");
+}
+
+void action2() {
+  lcd.clear();
+  lcd.print(">Executing #2");
+  delay(1500);
+}
+void action3() {
+  lcd.clear();
+  lcd.print(">Executing #3");
+  delay(1500);
+}
+void action4() {
+  lcd.clear();
+  lcd.print(">Executing #4");
+  delay(1500);
+}
+void action5() {
+  lcd.clear();
+  lcd.print(">Executing #5");
+  delay(1500);
+}
+void action6() {
+  lcd.clear();
+  lcd.print(">Exit");
+  delay(1500);
+}
+
+
+void setDatePage() {
+  String dt = String(now.day() / 10)
+            + String(now.day() % 10) + "/"
+            + String(now.month() / 10)
+            + String(now.month()% 10) + "/"
+            + String(now.year());
+            
+  switch (submenu)
+  {
+  case 1:
+    lcd.clear();
+    lcd.print(">DATE:" + dt);
+    lcd.setCursor(0,1);
+    lcd.print(" SAVE ^^");
+    break;
+  case 2:
+    lcd.clear();
+    lcd.print(" DATE:" + dt);
+    lcd.setCursor(0,1);
+    lcd.print(">SAVE");
+    break;
+  case 3:
+    submenu = 2;
+    break;
+  }
+
+}
+
+
+int Contain(uint32_t array[], uint32_t element) {
+    for (int i = 0; i <= 9; i++) {
+      if (array[i] == element) {
+          return i;
+      }
+    }
+  return -1;
+ }
+
+
+
+
+
+
+
+ 
+
+
+
+  // switch (pos)
+  // {
+  // case 1:
+  //   if (dirc == 1)
+  //   {
+  //     setDT[0]++;
+  //     if (setDT[0] > 3) setDT[0] = 3;
+  //   }else if (dirc == -1)
+  //   {
+  //     setDT[0]--;
+  //     if (setDT[0] < 0) setDT[0] = 0;
+  //   }
+  //   break;
+  // case 2:
+  //   if (dirc == 1)
+  //   {
+  //     setDT[1]++;
+  //     if (setDT[1] > 9) setDT[1] = 9;
+  //   }else if (dirc == -1)
+  //   {
+  //     setDT[1]--;
+  //     if (setDT[1] < 0) setDT[1] = 0;
+  //   }
+  //   break;
+  // case 3:
+  //   if (dirc == 1)
+  //   {
+  //     setDT[2]++;
+  //     if (setDT[2] > 1) setDT[2] = 1;
+  //   }else if (dirc == -1)
+  //   {
+  //     setDT[2]--;
+  //     if (setDT[2] < 0) setDT[2] = 0;
+  //   }
+  //   break;
+  // case 4:
+  //   if (dirc == 1)
+  //   {
+  //     setDT[3]++;
+  //     if (setDT[3] > 9) setDT[3] = 9;
+  //   }else if (dirc == -1)
+  //   {
+  //     setDT[3]--;
+  //     if (setDT[3] < 0) setDT[3] = 0;
+  //   }
+  //   break;
+  // case 5:
+  //   if (dirc == 1)
+  //   {
+  //     setDT[4]++;
+  //     if (setDT[4] > 9) setDT[4] = 9;
+  //   }else if (dirc == -1)
+  //   {
+  //     setDT[4]--;
+  //     if (setDT[4] < 0) setDT[4] = 0;
+  //   }
+  //   break;
+  // case 6:
+  //   if (dirc == 1)
+  //   {
+  //     setDT[5]++;
+  //     if (setDT[5] > 9) setDT[5] = 9;
+  //   }else if (dirc == -1)
+  //   {
+  //     setDT[5]--;
+  //     if (setDT[5] < 0) setDT[5] = 0;
+  //   }
+  //   break;
+  // }
+uint32_t IRnum[10] = {12582912, 12582913, 12582914, 12582915, 12582916, 12582917, 12582918, 12582919, 12582920, 12582921};
+
+  void setDate()
+{
+  tmpDate = now;
+  int but = Contain(IRnum, results.value);
+  Serial.println("Button : " + String(but));
+  if (but != -1)
+  {
+    Serial.println("i = " + String(i));
+    if (i == 7)
+    {
+      submenu = 2;
+      i = 1;
+    }
+    if (i == 1)
+    {
+      if (but <= 3) dd = but *10; else dd = 0;
+      lcd.setCursor(6,0);
+      lcd.print(dd);
+      lcd.setCursor(0,1);
+      lcd.print(" SAVE  ^");
+    }
+    if (i == 2)
+    {
+      if (dd == 30) {
+        if (but <= 1) dd = dd + but;
+      } else {
+        dd = dd + but;
+      }
+      lcd.setCursor(6,0);
+      lcd.print(doubledigit(dd));
+      lcd.setCursor(0,1);
+      lcd.print(" SAVE    ^");
+      Serial.println("dd : " + String(dd));
+    }
+    if (i == 3)
+    {
+      
+      if (but <= 1) mm = but *10; else mm = 0;
+      lcd.setCursor(9,0);
+      lcd.print(mm);
+      lcd.setCursor(0,1);
+      lcd.print(" SAVE     ^");
+    }
+    if (i == 4)
+    {
+      if (mm == 10) {
+        if (but <= 2)  mm = mm + but;
+      } else {
+        mm = mm + but;
+      }
+      lcd.setCursor(9,0);
+      lcd.print(doubledigit(mm));
+      lcd.setCursor(0,1);
+      lcd.print(" SAVE         ^");
+      Serial.println("dd : " + String(mm));
+    }
+    if (i == 5)
+    {
+
+      yy = 2000;
+      yy = yy + but*10;
+      lcd.setCursor(12,0);
+      lcd.print(yy);
+      lcd.setCursor(0,1);
+      lcd.print(" SAVE          ^");
+    }
+    if (i == 6)
+    {
+      yy = yy + but;
+      lcd.setCursor(12,0);
+      lcd.print(yy);
+      lcd.setCursor(0,1);
+      lcd.print(" SAVE            ");
+      submenu = 2;
+      tmpDate = DateTime(yy,mm,dd,now.hour(), now.minute(), now.second());
+      showMenu_Level2();
+    }
+      i++;
+    
+  }
+  delay(300);
