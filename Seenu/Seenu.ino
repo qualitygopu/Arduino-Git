@@ -205,9 +205,9 @@ void setup()
     case MOD1RUN:
       lcd.clear();
       lcd.setCursor(0,0);
-      lcd.print("Mode 1 Continue");
+      lcd.print(F("Mode 1 Continue"));
       lcd.setCursor(0,1);
-      lcd.print("Stop at: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
+      lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
       delay(1000);
       digitalWrite(MOTOR, HIGH);
       tim_sprInter = millis(); 
@@ -215,24 +215,24 @@ void setup()
     case MOD2RUN:
       lcd.clear();
       lcd.setCursor(0,0);
-      lcd.print("Mode 2 Continue");
+      lcd.print(F("Mode 2 Continue"));
       lcd.setCursor(0,1);
-      lcd.print("Stop at: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
+      lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
       delay(1000);
       digitalWrite(MOTOR, HIGH);
       break;
     case MOD3RUN:
       lcd.clear();
       lcd.setCursor(0,0);
-      lcd.print("Mode 3 Continue");
+      lcd.print(F("Mode 3 Continue"));
       lcd.setCursor(0,1);
-      lcd.print("Stop at: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
+      lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
       delay(1000);
       digitalWrite(MOTOR, HIGH);
       break;
     default:
       lcd.clear();
-      lcd.println("Meachine Ready");
+      lcd.println(F("Meachine Ready"));
       delay(500);
       break;
     }
