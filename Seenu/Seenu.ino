@@ -9,9 +9,6 @@
 #define BUT4    5
 #define MOTOR   8
 #define SPRAY   9
-#define ACTIVE  1
-#define DEACTIVE 0
-
 
 LiquidCrystal_I2C lcd(0x38,20,4);
 RTC_DS3231 rtc;
@@ -130,6 +127,7 @@ struct Option
 
 enum MENU
 {
+  NON,
   ROOT,
   DATTIM,
   DATTIM_SET,
@@ -148,7 +146,7 @@ enum MENU
 
 Option options;
 BUTT curtBut;
-MENU CUR_MNU = ROOT;
+MENU CUR_MNU = NON;
 MENU lastMNU;
 MECSTAT MechState;
 int lstmenu;
@@ -169,74 +167,101 @@ String doubledigit(int v);
 void setup()
 {
   Serial.begin(9600);
-    pinMode(BUT1, INPUT_PULLUP);
-    pinMode(BUT2, INPUT_PULLUP);
-    pinMode(BUT3, INPUT_PULLUP);
-    pinMode(BUT4, INPUT_PULLUP);
-    pinMode(MOTOR, OUTPUT);
-    pinMode(SPRAY, OUTPUT);
+  pinMode(BUT1, INPUT_PULLUP);
+  pinMode(BUT2, INPUT_PULLUP);
+  pinMode(BUT3, INPUT_PULLUP);
+  pinMode(BUT4, INPUT_PULLUP);
+  pinMode(MOTOR, OUTPUT);
+  pinMode(SPRAY, OUTPUT);
 
-    EEPROM.begin();
-    EEPROM.get(0,options);    
-    rtc.begin();
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    
-    
-
-
-    lcd.init();
-    lcd.backlight();
-    lcd.setCursor(3,0);
-    lcd.print(F("STRON"));
-    //delay(1000);
-    
-
-    Serial.println("Mode 1 Motor Time : " + String(options.m1MotTim)); 
-    Serial.println("Mode 1 Spray Interval : " + String(options.m1SprIntr));
-    Serial.println("Mode 1 Spray Time : " + String(options.m1SprTim));
-    Serial.println("Mode 2 Motor Time : " + String(options.m2MotTim));
-    Serial.println("Mode 2 Spray Interval : " + String(options.m2SprIntr));
-    Serial.println("Mode 2 Spray Time : " + String(options.m2SprTim));
-    Serial.println("Mode 2 Spray Delay : " + String(options.m2SprDly));
-    Serial.println("Mode 3 Motor Time : " + String(options.m3MotTim));
-    Serial.println("****************************************************");
-    switch (options.CUR_STAT)
-    {   
-    case MOD1RUN:
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(F("Mode 1 Continue"));
-      lcd.setCursor(0,1);
-      lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
-      delay(1000);
-      digitalWrite(MOTOR, HIGH);
-      tim_sprInter = millis(); 
-      break;
-    case MOD2RUN:
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(F("Mode 2 Continue"));
-      lcd.setCursor(0,1);
-      lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
-      delay(1000);
-      digitalWrite(MOTOR, HIGH);
-      break;
-    case MOD3RUN:
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(F("Mode 3 Continue"));
-      lcd.setCursor(0,1);
-      lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
-      delay(1000);
-      digitalWrite(MOTOR, HIGH);
-      break;
-    default:
-      lcd.clear();
-      lcd.println(F("Meachine Ready"));
-      delay(500);
-      break;
-    }
+  EEPROM.begin();
+  loadSettings();
+  if (!rtc.begin())
+  {
     lcd.clear();
+    lcd.print(F("ERR 01")); // Couldn't find RTC
+    abort();
+  }
+
+  if (!rtc.lostPower())
+  {
+    lcd.clear();
+    lcd.print(F("ERR 02"));
+    delay(2000);
+  }
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(3,0);
+  lcd.print(F("STRON"));
+  //delay(1000);
+  
+  // Serial.println("Mode 1 Motor Time : " + String(options.m1MotTim)); 
+  // Serial.println("Mode 1 Spray Interval : " + String(options.m1SprIntr));
+  // Serial.println("Mode 1 Spray Time : " + String(options.m1SprTim));
+  // Serial.println("Mode 2 Motor Time : " + String(options.m2MotTim));
+  // Serial.println("Mode 2 Spray Interval : " + String(options.m2SprIntr));
+  // Serial.println("Mode 2 Spray Time : " + String(options.m2SprTim));
+  // Serial.println("Mode 2 Spray Delay : " + String(options.m2SprDly));
+  // Serial.println("Mode 3 Motor Time : " + String(options.m3MotTim));
+  Serial.println("****************************************************");
+  switch (options.CUR_STAT)
+  {   
+  case MOD1RUN:
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(F("Mode 1 Continue"));
+    lcd.setCursor(0,1);
+    lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
+    delay(1000);
+    digitalWrite(MOTOR, HIGH);
+    tim_sprInter = millis(); 
+    break;
+  case MOD2RUN:
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(F("Mode 2 Continue"));
+    lcd.setCursor(0,1);
+    lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
+    delay(1000);
+    digitalWrite(MOTOR, HIGH);
+    break;
+  case MOD3RUN:
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(F("Mode 3 Continue"));
+    lcd.setCursor(0,1);
+    lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
+    delay(1000);
+    digitalWrite(MOTOR, HIGH);
+    break;
+  default:
+    lcd.clear();
+    lcd.println(F("Meachine Ready"));
+    delay(500);
+    break;
+  }
+  lcd.clear();
+}
+
+void loadSettings()
+{
+  if (EEPROM.read(1023) == 'T')
+  {
+    EEPROM.get(0,options);
+  }else
+  {
+    options.m1MotTim = 480;
+    options.m1SprIntr = 15;
+    options.m1SprTim = 10;
+    options.m2MotTim = 480;
+    options.m2SprDly = 120;
+    options.m2SprIntr = 15;
+    options.m2SprTim = 10;
+    options.m3MotTim = 480;
+    options.CUR_STAT = MECSTOP;
+    EEPROM.put(0,options);
+    EEPROM.write(1023,'T');
+  }
 }
 
 void loop()
@@ -297,7 +322,7 @@ delay(100);
     curtBut = But4; 
   }
 
-  if (CUR_MNU == ROOT) 
+  if (CUR_MNU == NON) 
   {
     switch (curtBut) {
       case But1:
@@ -456,12 +481,14 @@ delay(100);
         case 0:
           level++;
           menu = 1;
+          CUR_MNU = ROOT;
           showMenu_Level1();
           break;
         default:
           level = 0;
           lcd.clear();
-          lcd.print(F("     QTRON      "));
+          CUR_MNU = NON;
+          lcd.print(F("     STRON      "));
           break;
         }
 			break;
@@ -511,7 +538,7 @@ delay(100);
           level--;
           lcd.clear();
           lcd.print(F("     QTRON      "));
-          CUR_MNU = ROOT;
+          CUR_MNU = NON;
           break;
         case 2:
           level--;
@@ -543,14 +570,25 @@ void showTime()
 void restorePreMenu()
 {
   if (CUR_MNU == DATTIM)
+  {  
+    CUR_MNU = ROOT;
     menu = 1;
+  }
   if (CUR_MNU == MOD1)
+  {  
+    CUR_MNU = ROOT;
     menu = 2;
+  }
   if (CUR_MNU == MOD2)
+  {  
+    CUR_MNU = ROOT;
     menu = 3;
+  }
   if (CUR_MNU == MOD3)
+  {  
+    CUR_MNU = ROOT;
     menu = 4;
-
+  }
   if (CUR_MNU == DATTIM_SET)
   {
     CUR_MNU = DATTIM;
@@ -579,7 +617,7 @@ void showMenu_Level1()
   switch (menu)
   {
   case 0:
-    menu = 5;
+    menu = 1;
     break;
   case 1:
     lcd.clear();
@@ -622,7 +660,7 @@ void showMenu_Level1()
     lcd.print(F(">MODE 3"));
     break;
   case 5:
-    menu = 0;
+    menu = 5;
     break;
   }
 }
@@ -743,13 +781,13 @@ void execute_Level1()
     CUR_MNU = DATTIM_SET;
     lcd.clear();
     lcd.setCursor(4, 0);
-    lcd.print("DATE      TIME");
+    lcd.print(F("DATE      TIME"));
     lcd.setCursor(1,1);
     lcd.print(doubledigit(now.day()) + "/" + doubledigit(now.month()) + "/" + String(now.year()) + " - " + doubledigit(now.hour()) + ":" + doubledigit(now.minute()));
     lcd.setCursor(1, 2);
     lcd.print("^");
     lcd.setCursor(0,3);
-    lcd.print("^    v    <>     SAVE");
+    lcd.print(F("UP   DWN   SEL  SAVE"));
     curPos = 1;
     setDT[0] = now.day() / 10;
     setDT[1] = now.day() % 10;
@@ -796,6 +834,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m1MotTim) + " Min");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD1_Mot_tim = options.m1MotTim;
         break;
@@ -807,6 +847,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m1SprTim) + " Sec");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD1_Spra_tim = options.m1SprTim;
         break;
@@ -818,6 +860,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m1SprIntr) + " Min");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD1_Spra_int = options.m1SprIntr;
         break;
@@ -835,6 +879,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m2MotTim) + " Min");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD2_Mot_tim = options.m2MotTim;
         break;
@@ -846,6 +892,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m2SprTim) + " Sec");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD2_Spra_tim = options.m2SprTim;
         break;
@@ -857,6 +905,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m2SprIntr) + " Min");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD2_Spra_int = options.m2SprIntr;
         break;
@@ -868,6 +918,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m2SprDly) + " Min");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD2_Spra_Strt = options.m2SprDly;
         break;
@@ -885,6 +937,8 @@ void execute_Level2()
         lcd.print(">SET TIME : " + trebledigit(options.m3MotTim) + " Min");
         lcd.setCursor(12,2);
         lcd.print(F("^"));
+        lcd.setCursor(0,3);
+        lcd.print(F("UP   DWN   SEL  SAVE"));
         curPos=1;
         tmpMOD3_Mot_tim = options.m3MotTim;
         break;
@@ -1047,7 +1101,7 @@ void setMod1MotTime(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1056,19 +1110,19 @@ void setMod1MotTime(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
     case But1:
       tmpMOD1_Mot_tim = changeValue(tmpMOD1_Mot_tim, curPos, 1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Mot_tim) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Mot_tim) + " Min ");
       break;
     case But2:
       tmpMOD1_Mot_tim = changeValue(tmpMOD1_Mot_tim,curPos,-1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Mot_tim) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Mot_tim) + " Min ");
       break;
     case But4:
       CUR_MNU = MOD1;
@@ -1090,7 +1144,7 @@ void setMod1SprTime(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1099,7 +1153,7 @@ void setMod1SprTime(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1133,7 +1187,7 @@ void setMod1SprIntr(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1142,19 +1196,19 @@ void setMod1SprIntr(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
     case But1:
       tmpMOD1_Spra_int = changeValue(tmpMOD1_Spra_int, curPos, 1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Spra_int) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Spra_int) + " Min ");
       break;
     case But2:
       tmpMOD1_Spra_int = changeValue(tmpMOD1_Spra_int,curPos,-1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Spra_int) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD1_Spra_int) + " Min ");
       break;
     case But4:
       CUR_MNU = MOD1;
@@ -1176,7 +1230,7 @@ void setMod2MotTime(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1185,19 +1239,20 @@ void setMod2MotTime(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
     case But1:
       tmpMOD2_Mot_tim = changeValue(tmpMOD2_Mot_tim, curPos, 1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Mot_tim) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Mot_tim) + " Min ");
+
       break;
     case But2:
       tmpMOD2_Mot_tim = changeValue(tmpMOD2_Mot_tim,curPos,-1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Mot_tim) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Mot_tim) + " Min ");
       break;
     case But4:
       CUR_MNU = MOD2;
@@ -1219,7 +1274,7 @@ void setMod2SprTime(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1228,7 +1283,7 @@ void setMod2SprTime(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1262,7 +1317,7 @@ void setMod2SprIntr(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1271,19 +1326,19 @@ void setMod2SprIntr(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
     case But1:
       tmpMOD2_Spra_int = changeValue(tmpMOD2_Spra_int, curPos, 1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_int) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_int) + " Min ");
       break;
     case But2:
       tmpMOD2_Spra_int = changeValue(tmpMOD2_Spra_int,curPos,-1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_int) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_int) + " Min ");
       break;
     case But4:
       CUR_MNU = MOD2;
@@ -1305,7 +1360,7 @@ void setMod2SprStrt(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1314,19 +1369,19 @@ void setMod2SprStrt(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
     case But1:
       tmpMOD2_Spra_Strt = changeValue(tmpMOD2_Spra_Strt, curPos, 1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_Strt) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_Strt) + " Min ");
       break;
     case But2:
       tmpMOD2_Spra_Strt = changeValue(tmpMOD2_Spra_Strt,curPos,-1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_Strt) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD2_Spra_Strt) + " Min ");
       break;
     case But4:
       CUR_MNU = MOD2;
@@ -1348,7 +1403,7 @@ void setMod3MotTime(BUTT key)
       if (curPos < 1)
         curPos = 3;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
@@ -1357,19 +1412,19 @@ void setMod3MotTime(BUTT key)
       if (curPos > 3)
         curPos = 1;
       lcd.setCursor(0,2);
-      lcd.print(F("                      "));
+      lcd.print(F("                    "));
       lcd.setCursor((11+curPos),2);
       lcd.print(F("^"));
       break;
     case But1:
       tmpMOD3_Mot_tim = changeValue(tmpMOD3_Mot_tim, curPos, 1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD3_Mot_tim) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD3_Mot_tim) + " Min ");
       break;
     case But2:
       tmpMOD3_Mot_tim = changeValue(tmpMOD3_Mot_tim,curPos,-1);
       lcd.setCursor(0,1);
-      lcd.print(">SET TIME : " + trebledigit(tmpMOD3_Mot_tim) + " Min      ");
+      lcd.print(">SET TIME : " + trebledigit(tmpMOD3_Mot_tim) + " Min ");
       break;
     case But4:
       CUR_MNU = MOD3;
