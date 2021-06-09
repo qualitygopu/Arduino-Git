@@ -20,13 +20,14 @@ LiquidCrystal_I2C lcd(0x27,20,2);
 int byteReceived, a = 0;
 int waterLevel, waterflow;
 int SendStat;
-long tim_on, tim_off, buttonTimer = 0, longPressTime = 1000, tim_setlow = 0, tim_progres=0;
-boolean Pow_on = false;
+long tim_on, tim_off, buttonTimer = 0, longPressTime = 1000, tim_setlow = 0, tim_progres=0, tim_lowOn=0;
+bool Pow_on = false, lowOn = false;
 int TankHight, AutoMode=0, LowLevel = 10;
 enum MOTORSTATE {ON, OFF};
 MOTORSTATE MotorState;
 byte tx[4];
 int counter = 0;
+
 //dat
 
 class MySwitch {
@@ -34,7 +35,7 @@ class MySwitch {
     byte pin;
     bool Key_Down = false, Key_Hold = false, Key_Up = false;
     bool butAct, longAct;
-    long butTimer, holdDelay = 1000;
+    long butTimer, holdDelay = 3000;
     byte state;
     int x = 0, y;
   public:
@@ -184,7 +185,7 @@ void loop()
     }
   }
   if (millis() > tim_on + 1000) digitalWrite(START, LOW);
-  if (millis() > tim_off + 1000) digitalWrite(STOP, LOW);
+  if (millis() > tim_off + 5000) digitalWrite(STOP, LOW);
   
   if (digitalRead(On_Det) == LOW){
     MotorState = ON;
@@ -232,7 +233,47 @@ void loop()
       }
       if (waterLevel <= LowLevel && AutoMode == 1)
       {
+        if (lowOn == false)
+        {
+          tim_lowOn = millis();
+          lowOn = true;
+        }
+      } 
+      else
+      {
+        lowOn = false;
+      } 
+      if (millis() > tim_lowOn + 30000 && lowOn == true)
+      {
         MotorOn();
+        lowOn = false;
+      }
+      lcd.setCursor(0, 0);
+      lcd.print(lowOn == true ? "WATER LEVEL LOW " : "WATER LEVEL     ");
+      LevelBar(waterLevel/10);
+      lcd.setCursor(10,1);
+      lcd.print(">>" + String(waterLevel) + "% ");
+      if (MotorState == ON )
+      {
+        if (millis() > tim_progres + 200)
+        {
+          tim_progres = millis();
+          if (((waterLevel/10) + a) > 10) 
+          {
+            a = 0;
+            lcd.setCursor((waterLevel/10), 1);
+            lcd.print(strSpace(10 - (waterLevel/10)));
+          }
+          lcd.setCursor(((waterLevel/10) + a-1), 1);
+          lcd.write(0);
+          a++;
+        }
+      } 
+      else if (MotorState == OFF)
+      {
+        a=0;
+        lcd.setCursor(waterLevel/10, 1);
+        lcd.print(strSpace(10 - (waterLevel/10)));
       }
     }
     else {
@@ -240,39 +281,6 @@ void loop()
       lcd.print(F("TANK UNIT ERR"));
     }
   
-  
-  if (MotorState == ON )
-  {
-    if (millis() > tim_progres + 200)
-    {
-      tim_progres = millis();
-      if (((waterLevel/10) + a) > 10) 
-      {
-        a = 0;
-        lcd.setCursor((waterLevel/10), 1);
-        lcd.print(strSpace(10 - (waterLevel/10)));
-      }
-      lcd.setCursor(((waterLevel/10) + a-1), 1);
-      lcd.write(0);
-      a++;
-    }
-  } 
-  else if (MotorState == OFF)
-  {
-    a=0;
-    lcd.setCursor(waterLevel/10, 1);
-    lcd.print(strSpace(10 - (waterLevel/10)));
-  }
-
-  //Show LCD Display
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("WATER LEVEL     ");
-    LevelBar(waterLevel/10);
-    lcd.setCursor(10,1);
-    lcd.print(">>" + String(waterLevel) + "% ");
-  }
-
   //Clear Serial Buffer
   if (RS485.overflow())
   {
@@ -340,7 +348,7 @@ void changeAutomode()  // Auto Mode ON/OFF
 void setLowLevel()
 {
   lcd.clear();
-    
+  tim_setlow = millis();  
   while(true)
   {
     if (millis() - tim_setlow > 10000) break;
