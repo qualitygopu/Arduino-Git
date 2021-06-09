@@ -184,15 +184,8 @@ void setup()
     Pow_on = true;
   else
     Pow_on = false;
-
- 
- 
 }
 
-void setTankHeight()
-{
-  
-}
 
 void loadSettings()
 {
