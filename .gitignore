@@ -16,3 +16,11 @@ Seenu/build/arduino.avr.uno/Seenu.ino.elf
 Seenu/build/arduino.avr.uno/Seenu.ino.hex
 Seenu/build/arduino.avr.uno/Seenu.ino.with_bootloader.bin
 Seenu/build/arduino.avr.uno/Seenu.ino.with_bootloader.hex
+Water Level/Control_Unit/.vscode/c_cpp_properties.json
+Water Level/Control_Unit_New/.vscode/c_cpp_properties.json
+Water Level/Tank_Unit/.vscode/c_cpp_properties.json
+Water Level/Control_Unit/.vscode/arduino.json
+Water Level/Control_Unit_New/.vscode/arduino.json
+Water Level/Tank_Unit/.vscode/arduino.json
+LCDMenu/lcdMenu/.vscode/c_cpp_properties.json
+LCDMenu/lcdMenu/.vscode/c_cpp_properties.json

@@ -9,8 +9,9 @@
 #define BUT4    5
 #define MOTOR   8
 #define SPRAY   9
+#define BUZZR   7
 
-LiquidCrystal_I2C lcd(0x38,20,4);
+LiquidCrystal_I2C lcd(0x27,20,4);
 RTC_DS3231 rtc;
 
 class MySwitch {
@@ -18,7 +19,7 @@ class MySwitch {
     byte pin;
     bool Key_Down = false, Key_Hold = false, Key_Up = false;
     bool butAct, longAct;
-    long butTimer, holdDelay = 1000;
+    long butTimer, holdDelay = 3000;
     byte state;
     int x = 0, y;
   public:
@@ -90,12 +91,13 @@ MySwitch Button4(BUT4);
 
 int curPos = 1;
 int setDT[10];
+int backLight_dur = 10000;
 DateTime now;
-DateTime tmpDate;
+DateTime tmpDate, remainTime;
 String timeNow;
 int menu = 0, level = 0;
-unsigned long tim_sprTime, tim_sprInter;
-bool sprayActive = false, sprayStrat = false;
+unsigned long tim_sprTime, tim_sprInter, tim_lcdStat, tmr_beep;
+bool sprayActive = false, sprayStrat = false, Pow_on = false, beep=false;
 
 enum BUTT
 {
@@ -173,79 +175,43 @@ void setup()
   pinMode(BUT4, INPUT_PULLUP);
   pinMode(MOTOR, OUTPUT);
   pinMode(SPRAY, OUTPUT);
-
+  pinMode(BUZZR, OUTPUT);
+  lcd.init();
+  lcd.backlight();  
+  lcd.setCursor(4,1);
+  lcd.print(F("SUJATRONICS"));
+  delay(1000);
+  lcd.clear();
   EEPROM.begin();
   loadSettings();
-  if (!rtc.begin())
+  
+  while (!rtc.begin())
   {
     lcd.clear();
     lcd.print(F("ERR 01")); // Couldn't find RTC
-    abort();
   }
 
-  if (!rtc.lostPower())
+  if (rtc.lostPower())
   {
     lcd.clear();
     lcd.print(F("ERR 02"));
     delay(2000);
   }
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(3,0);
-  lcd.print(F("STRON"));
-  //delay(1000);
   
-  // Serial.println("Mode 1 Motor Time : " + String(options.m1MotTim)); 
-  // Serial.println("Mode 1 Spray Interval : " + String(options.m1SprIntr));
-  // Serial.println("Mode 1 Spray Time : " + String(options.m1SprTim));
-  // Serial.println("Mode 2 Motor Time : " + String(options.m2MotTim));
-  // Serial.println("Mode 2 Spray Interval : " + String(options.m2SprIntr));
-  // Serial.println("Mode 2 Spray Time : " + String(options.m2SprTim));
-  // Serial.println("Mode 2 Spray Delay : " + String(options.m2SprDly));
-  // Serial.println("Mode 3 Motor Time : " + String(options.m3MotTim));
-  Serial.println("****************************************************");
-  switch (options.CUR_STAT)
-  {   
-  case MOD1RUN:
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print(F("Mode 1 Continue"));
-    lcd.setCursor(0,1);
-    lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
-    delay(1000);
-    digitalWrite(MOTOR, HIGH);
-    tim_sprInter = millis(); 
-    break;
-  case MOD2RUN:
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print(F("Mode 2 Continue"));
-    lcd.setCursor(0,1);
-    lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
-    delay(1000);
-    digitalWrite(MOTOR, HIGH);
-    break;
-  case MOD3RUN:
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print(F("Mode 3 Continue"));
-    lcd.setCursor(0,1);
-    lcd.print("Stop At: " + String(options.MotrStopTime.hour()) + ":" + String(options.MotrStopTime.minute()));
-    delay(1000);
-    digitalWrite(MOTOR, HIGH);
-    break;
-  default:
-    lcd.clear();
-    lcd.println(F("Meachine Ready"));
-    delay(500);
-    break;
-  }
-  lcd.clear();
+  
+
+  if (options.CUR_STAT == MECSTOP)
+    Pow_on = false;
+  else
+    Pow_on = true;
+  
+  
+  Serial.println(Pow_on);
 }
 
 void loadSettings()
 {
-  if (EEPROM.read(1023) == 'T')
+  if (EEPROM.read(1023) == 100)
   {
     EEPROM.get(0,options);
   }else
@@ -260,93 +226,186 @@ void loadSettings()
     options.m3MotTim = 480;
     options.CUR_STAT = MECSTOP;
     EEPROM.put(0,options);
-    EEPROM.write(1023,'T');
+    EEPROM.write(1023, 100);
   }
 }
 
 void loop()
 {
+  static unsigned long tmr_lcdlight = millis();
   static unsigned long timr = millis();
-	// Show LCD Time Date
-if (millis() - timr > 500)
-{
-  timr = millis();
-  if (level == 0)
-  showTime();
-     
-}
 
-delay(100);
-
-  curtBut = _null;
-  Button1.update();
-  if (Button1.isHold())
+  if (Pow_on == true)
   {
-    Button1.clearValue();
-    curtBut = SETTING;
-  }else if (Button1.isPressed())
-  {
-    Button1.clearValue();
-    curtBut = But1; 
+    lcd.backlight(); tmr_lcdlight = millis();
+    digitalWrite(BUZZR, HIGH);
+    delay(300);
+    digitalWrite(BUZZR, LOW);
+    delay(100);
+    lcd.setCursor(0,0);
+    lcd.print(F(" READY TO CONTINUE"));
+    lcd.setCursor(0,2);
+    lcd.print(F("LONG PRESS STOP BUTT"));
+    lcd.setCursor(0,3);
+    lcd.print(F("  TO STOP MECHINE   "));
+    Button4.update();
+    if (Button4.isHold())
+    {
+      Button4.clearValue();
+      Pow_on = false;
+      options.CUR_STAT = MECSTOP;
+      EEPROM.put(0,options);
+    }
+    if(millis() > 30000)
+    {
+      Pow_on = false;
+      switch (options.CUR_STAT)
+      {   
+      case MOD1RUN:
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(F("MODE 1 CONTINUE"));
+        lcd.setCursor(0,1);
+        delay(1000);
+        digitalWrite(MOTOR, HIGH);
+        tim_sprInter = millis(); 
+        break;
+      case MOD2RUN:
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(F("MODE 2 CONTINUE"));
+        lcd.setCursor(0,1);
+        delay(1000);
+        digitalWrite(MOTOR, HIGH);
+        break;
+      case MOD3RUN:
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(F("MODE 3 CONTINUE"));
+        lcd.setCursor(0,1);
+        delay(1000);
+        digitalWrite(MOTOR, HIGH);
+        break;
+      }
+    }
   }
 
-  Button2.update();
-  if (Button2.isHold())
+  // Show LCD Time Date
+  if (millis() - timr > 500 && Pow_on == false)
   {
-    Button2.clearValue();
-  }else if (Button2.isPressed())
+    timr = millis();
+    if (level == 0)
+      showTime();
+  }
+  delay(100);
+
+  
+  if (millis() >= tmr_lcdlight + backLight_dur)
   {
-    Button2.clearValue();
-    curtBut = But2; 
+    lcd.noBacklight();
   }
 
-  Button3.update();
-  if (Button3.isHold())
+  if (digitalRead(BUT1) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
+  if (digitalRead(BUT2) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
+  if (digitalRead(BUT3) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
+  if (digitalRead(BUT4) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
+
+  // Set But State
   {
-    curtBut = LEFT;
-    Button3.clearValue();
-  }else if (Button3.isPressed())
-  {
-    Button3.clearValue();
-    curtBut = But3; 
+    curtBut = _null;
+    Button1.update();
+    if (Button1.isHold())
+    {
+      Button1.clearValue();
+      curtBut = SETTING;
+    }else if (Button1.isPressed())
+    {
+      Button1.clearValue();
+      curtBut = But1; 
+    }
+
+    Button2.update();
+    if (Button2.isHold())
+    {
+      Button2.clearValue();
+    }else if (Button2.isPressed())
+    {
+      Button2.clearValue();
+      curtBut = But2; 
+    }
+
+    Button3.update();
+    if (Button3.isHold())
+    {
+      curtBut = LEFT;
+      Button3.clearValue();
+    }else if (Button3.isPressed())
+    {
+      Button3.clearValue();
+      curtBut = But3; 
+    }
+
+    Button4.update();
+    if (Button4.isHold())
+    {
+      Button4.clearValue();
+      curtBut = EXIT;
+    }else if (Button4.isPressed())
+    {
+      Button4.clearValue();
+      curtBut = But4; 
+    }
   }
 
-  Button4.update();
-  if (Button4.isHold())
-  {
-    Button4.clearValue();
-    curtBut = EXIT;
-  }else if (Button4.isPressed())
-  {
-    Button4.clearValue();
-    curtBut = But4; 
-  }
-
-  if (CUR_MNU == NON) 
+  if (CUR_MNU == NON && Pow_on == false) 
   {
     switch (curtBut) {
       case But1:
-        digitalWrite(MOTOR, HIGH);
-        options.MotrStopTime = rtc.now() + TimeSpan(0,(options.m1MotTim / 60),(options.m1MotTim % 60),0);
-        options.CUR_STAT = MOD1RUN;
-        tim_sprInter = millis(); 
-        Serial.println("Mod 1 Stop time : " + options.MotrStopTime.timestamp());
-        EEPROM.put(0,options);
+        if (options.CUR_STAT == MECSTOP)
+        {
+          beep = false;
+          digitalWrite(MOTOR, HIGH);
+          options.MotrStopTime = rtc.now() + TimeSpan(0,(options.m1MotTim / 60),(options.m1MotTim % 60),0);
+          options.CUR_STAT = MOD1RUN;
+          tim_sprInter = millis(); 
+          lcd.clear();
+          Serial.println("Mod 1 Stop time : " + options.MotrStopTime.timestamp());
+          EEPROM.put(0,options);
+        } else 
+        {
+          checkMode();
+        }
       break;
       case But2:
-        digitalWrite(MOTOR, HIGH);
-        options.MotrStopTime = rtc.now() + TimeSpan(0,(options.m2MotTim / 60),(options.m2MotTim % 60),0);
-        options.SprayStarTime = now + TimeSpan(0,(options.m2SprDly / 60),(options.m2SprDly % 60),0);
-        options.CUR_STAT = MOD2RUN;
-        Serial.println("Mod 2 Stop time : " + options.MotrStopTime.timestamp());
-        EEPROM.put(0,options);
+        if (options.CUR_STAT == MECSTOP)
+          {
+            beep = false;
+            digitalWrite(MOTOR, HIGH);
+            options.MotrStopTime = rtc.now() + TimeSpan(0,(options.m2MotTim / 60),(options.m2MotTim % 60),0);
+            options.SprayStarTime = now + TimeSpan(0,(options.m2SprDly / 60),(options.m2SprDly % 60),0);
+            options.CUR_STAT = MOD2RUN;
+            lcd.clear();
+            Serial.println("Mod 2 Stop time : " + options.MotrStopTime.timestamp());
+            EEPROM.put(0,options);
+          } else 
+          {
+            checkMode();
+          }
       break;
       case But3:
-        digitalWrite(MOTOR, HIGH);
-        options.MotrStopTime = rtc.now() + TimeSpan(0,(options.m3MotTim / 60),(options.m3MotTim % 60),0);
-        options.CUR_STAT = MOD3RUN;
-        Serial.println("Mod 3 Stop time : " + options.MotrStopTime.timestamp());
-        EEPROM.put(0,options);
+        if (options.CUR_STAT == MECSTOP)
+        {
+          beep = false;
+          digitalWrite(MOTOR, HIGH);
+          options.MotrStopTime = rtc.now() + TimeSpan(0,(options.m3MotTim / 60),(options.m3MotTim % 60),0);
+          options.CUR_STAT = MOD3RUN;
+          lcd.clear();
+          Serial.println("Mod 3 Stop time : " + options.MotrStopTime.timestamp());
+          EEPROM.put(0,options);
+        } else 
+        {
+          checkMode();
+        }
       break;
       case But4:
       break;
@@ -356,11 +415,15 @@ delay(100);
         digitalWrite(SPRAY, LOW);
         sprayActive = false;
         EEPROM.put(0,options);
+        lcd.setCursor(0,2);
+        lcd.clear();
+        lcd.print("  MECHINE STOPPED   ");
+        delay(500);
       break;
     }
   }
 
-  if (options.CUR_STAT == MOD1RUN)
+  if (options.CUR_STAT == MOD1RUN && Pow_on == false)
   {
     if (millis() > tim_sprInter + ((options.m1SprIntr) * 60UL * 1000UL))
     {
@@ -389,10 +452,14 @@ delay(100);
       options.CUR_STAT = MECSTOP;
       sprayActive = false;
       EEPROM.put(0,options);
+      lcd.clear();
+      beep = true;
+      tmr_beep = millis();
+      lcd.backlight(); tmr_lcdlight = millis();
     }   
   }
 
-  if (options.CUR_STAT == MOD2RUN)
+  if (options.CUR_STAT == MOD2RUN && Pow_on == false)
   {
     if (now >= options.SprayStarTime && sprayStrat == false)
     {
@@ -427,10 +494,14 @@ delay(100);
       options.CUR_STAT = MECSTOP;
       sprayActive = false;
       EEPROM.put(0,options);
+      lcd.clear();
+      beep = true;
+      tmr_beep = millis();
+      lcd.backlight(); tmr_lcdlight = millis();
     }   
   }
 
-  if (options.CUR_STAT == MOD3RUN)
+  if (options.CUR_STAT == MOD3RUN && Pow_on == false)
   {
     if (now > options.MotrStopTime)
     {
@@ -439,10 +510,31 @@ delay(100);
       options.CUR_STAT = MECSTOP;
       sprayActive = false;
       EEPROM.put(0,options);
+      beep = true;
+      lcd.clear();
+      tmr_beep = millis();
+      lcd.backlight(); tmr_lcdlight = millis();
     }   
   }
 
-  
+  if (beep == true)
+  {
+    if (millis() < tmr_beep + 20000)
+    {
+      digitalWrite(BUZZR,HIGH);
+    }
+    else
+    {
+      digitalWrite(BUZZR,LOW);
+      beep = false;
+    }    
+  }
+  else
+  {
+    digitalWrite(BUZZR,LOW);
+  }
+
+
   switch (CUR_MNU)
   {
     case DATTIM_SET:
@@ -488,10 +580,11 @@ delay(100);
           level = 0;
           lcd.clear();
           CUR_MNU = NON;
-          lcd.print(F("     STRON      "));
+          lcd.setCursor(7,1);
+          lcd.print(F("STRON"));
           break;
         }
-			break;
+      break;
       case But2:
         switch (level)
         {
@@ -504,8 +597,8 @@ delay(100);
           showMenu_Level2();
           break;
         }
-			break;
-		  case But1:
+      break;
+      case But1:
         switch (level)
         {
         case 1:
@@ -517,7 +610,7 @@ delay(100);
           showMenu_Level2();
           break;
         }
-			break;
+      break;
       case But3:
         switch (level)
         {
@@ -530,14 +623,15 @@ delay(100);
           execute_Level2();
           break;
         }
-			break;
+      break;
       case But4:
         switch (level)
         {
         case 1:
           level--;
           lcd.clear();
-          lcd.print(F("     QTRON      "));
+          lcd.setCursor(7,1);
+          lcd.print(F("STRON"));
           CUR_MNU = NON;
           break;
         case 2:
@@ -549,22 +643,75 @@ delay(100);
       break;
     }
   }
-  
-	
+
+
+}
+
+void checkMode()
+{
+  tim_lcdStat = millis();
+  if (options.CUR_STAT == MOD1RUN)
+  {
+    lcd.setCursor(0,2);
+    lcd.println(F(">> MODE 1 RUNNING <<"));
+  }
+  else if (options.CUR_STAT == MOD2RUN)
+  {
+    lcd.setCursor(0,2);
+    lcd.println(F(">> MODE 2 RUNNING <<"));
+  }
+  else if (options.CUR_STAT == MOD3RUN)
+  {
+    lcd.setCursor(0,2);
+    lcd.println(F(">> MODE 3 RUNNING <<"));
+  }
 }
 
 void showTime()
 {
+  lcd.setCursor(0,0);
+  // lcd.print(F("     MODEL EXIM     "));
+
   now = rtc.now();
-  timeNow = String(now.twelveHour() / 10) + String(now.twelveHour() % 10) + ":" +
-              String(now.minute() / 10) + String(now.minute() % 10) + ":" +
-              String(now.second() / 10) + String(now.second() % 10) + " " +
-              String(now.isPM() ? "PM" : "AM");
-    //lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("     " + timeNow);
-    lcd.setCursor(0, 1);
-    lcd.print("     " + doubledigit(now.day()) + "-" + months[now.month() - 1] + "-" + String(now.year()));
+  timeNow = doubledigit(now.hour()) + ":" + doubledigit(now.minute()) + ":" + doubledigit(now.second());
+            // + " " + String(now.isPM() ? "PM" : "AM");
+  lcd.print(doubledigit(now.day()) + "/" + doubledigit(now.month()) + "/" + String(now.year()) + "  " + timeNow);
+
+  lcd.setCursor(0, 1);
+  lcd.print("--------------------");
+
+  if (options.CUR_STAT == MOD1RUN)
+  {
+    lcd.setCursor(0,2);
+    lcd.print(F("   MODE 1 RUNNING   "));
+    remainTime = options.MotrStopTime - TimeSpan(0,now.hour(),now.minute(),0);
+    lcd.setCursor(0,3);
+    lcd.print("REMAINING TIME " + doubledigit(remainTime.hour()) + ":" + doubledigit(remainTime.minute()) );
+  }
+  else if (options.CUR_STAT == MOD2RUN)
+  {
+    lcd.setCursor(0,2);
+    lcd.print(F("   MODE 2 RUNNING   "));
+    remainTime = options.MotrStopTime - TimeSpan(0,now.hour(),now.minute(),0);
+    lcd.setCursor(0,3);
+    lcd.print("REMAINING TIME " + doubledigit(remainTime.hour()) + ":" + doubledigit(remainTime.minute()) );
+  }
+  else if (options.CUR_STAT == MOD3RUN)
+  {
+    lcd.setCursor(0,2);
+    lcd.print(F("   MODE 3 RUNNING   "));
+    remainTime = options.MotrStopTime - TimeSpan(0,now.hour(),now.minute(),0);
+    lcd.setCursor(0,3);
+    lcd.print("REMAINING TIME " + doubledigit(remainTime.hour()) + ":" + doubledigit(remainTime.minute()) );
+  }
+  else
+  {
+    lcd.setCursor(0,2);
+    lcd.print(F("     MODEL EXIM     "));
+    // lcd.setCursor(0,3);
+    // lcd.print(F("                    "));
+  }
+
 }
 
 void restorePreMenu()
@@ -978,6 +1125,12 @@ void setDatTimUpDown(BUTT key)
     level--;
     showMenu_Level1();
     break;
+  case EXIT:
+    CUR_MNU = DATTIM;
+    menu = 1;
+    level--;
+    showMenu_Level1();
+    break;
   }
 }
 
@@ -1086,6 +1239,7 @@ void setCur(int pos)
     break;
   case 9:
       lcd.print("                 ^ ");
+    break;
   case 10:
       lcd.print("                  ^");
     break;
@@ -1451,9 +1605,13 @@ int changeValue(int value, int pos, int chng)
       break;
     case 2:
       te +=chng;
+      if (te > 9) te = 0;
+      if (te < 0) te = 9;
       break;
     case 3:
       on +=chng;
+      if (on > 9) on = 0;
+      if (on < 0) on = 9;
       break;
   }
   return (hu * 100) + (te * 10) + on;
