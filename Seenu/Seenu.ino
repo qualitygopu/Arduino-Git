@@ -179,7 +179,7 @@ void setup()
   lcd.init();
   lcd.backlight();  
   lcd.setCursor(4,1);
-  lcd.print(F("SUJATRONICS"));
+  lcd.print(F("SUJHATRONICS"));
   delay(1000);
   lcd.clear();
   EEPROM.begin();
@@ -471,6 +471,7 @@ void loop()
     {
       if (sprayActive == false)
       {
+        lcd.backlight(); tmr_lcdlight = millis();
         Serial.println("Spray ON : " + now.timestamp());
         digitalWrite(SPRAY, HIGH);
         tim_sprTime = millis();
@@ -653,17 +654,17 @@ void checkMode()
   if (options.CUR_STAT == MOD1RUN)
   {
     lcd.setCursor(0,2);
-    lcd.println(F(">> MODE 1 RUNNING <<"));
+    lcd.print(F(">> MODE 1 RUNNING <<"));
   }
   else if (options.CUR_STAT == MOD2RUN)
   {
     lcd.setCursor(0,2);
-    lcd.println(F(">> MODE 2 RUNNING <<"));
+    lcd.print(F(">> MODE 2 RUNNING <<"));
   }
   else if (options.CUR_STAT == MOD3RUN)
   {
     lcd.setCursor(0,2);
-    lcd.println(F(">> MODE 3 RUNNING <<"));
+    lcd.print(F(">> MODE 3 RUNNING <<"));
   }
 }
 
