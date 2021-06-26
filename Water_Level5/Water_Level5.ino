@@ -1,4 +1,5 @@
 #include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
 #include <EEPROM.h>
 
 #define STATUSLED   6
@@ -14,16 +15,14 @@
 #define LEV5        13
 #define DRY         8
 
+LiquidCrystal_I2C lcd(0x27,20,2);
 enum MOTORSTATE {ON, OFF};
+
 int waterLevel, waterflow, a;
 long tim_on, tim_off, buttonTimer = 0, longPressTime = 1000, tim_setlow = 0, tim_progres=0, tim_lowOn=0;
 bool Pow_on = false, lowOn = false;
 int AutoMode=0, LowLevel = 20;
 MOTORSTATE MotorState;
-
-int latchPin = 5;
-int clockPin = 6;
-int dataPin = 7;
 
 class MySwitch {
   private:
@@ -100,6 +99,16 @@ class MySwitch {
 MySwitch onSw(ONBUT);
 MySwitch offSw(OFFBUT);
 
+byte Bar[] = {
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111
+};
 
 void loadSettings()
 {
@@ -139,6 +148,19 @@ void setup()
 
     loadSettings();
     
+    lcd.init();
+	  lcd.backlight();
+    lcd.createChar(0, Bar);
+    lcd.setCursor(5,0);
+    lcd.print("QTRON");
+    delay(2000);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    String Ams = (AutoMode == 1) ? "ON  " : "OFF ";
+    lcd.println("AUTO MODE : " + Ams);
+    lcd.setCursor(0, 1);
+    lcd.println("LOW LEVEL: " + String(LowLevel)+"%   ");
+    delay(1000);
     if (MotorState == ON)
         Pow_on = true;
     else
@@ -222,6 +244,11 @@ void loop()
         MotorOn();
         lowOn = false;
       }
+      lcd.setCursor(0, 0);
+      lcd.print(lowOn == true ? "WATER LEVEL LOW " : "WATER LEVEL     ");
+      LevelBar(waterLevel/10);
+      lcd.setCursor(10,1);
+      lcd.print(">>" + String(waterLevel) + "% ");
       if (MotorState == ON )
       {
         if (millis() > tim_progres + 200)
@@ -230,13 +257,19 @@ void loop()
           if (((waterLevel/10) + a) > 10) 
           {
             a = 0;
+            lcd.setCursor((waterLevel/10), 1);
+            lcd.print(strSpace(10 - (waterLevel/10)));
           }
+          lcd.setCursor(((waterLevel/10) + a-1), 1);
+          lcd.write(0);
           a++;
         }
       } 
       else if (MotorState == OFF)
       {
         a=0;
+        lcd.setCursor(waterLevel/10, 1);
+        lcd.print(strSpace(10 - (waterLevel/10)));
       }
 }
 
@@ -246,6 +279,10 @@ void MotorOff()
   {
     tim_off = millis();
     digitalWrite(STOP, HIGH);
+    lcd.clear();
+    lcd.print("  MOTOR STOPED");
+    //MotorState = OFF;
+    // EEPROM.write(2, MotorState);
   }
 }
 
@@ -255,9 +292,21 @@ void MotorOn()
     {
       tim_on = millis();
       digitalWrite(START, HIGH);
+      lcd.clear();
+      lcd.print(" MOTOR STARTED");
+      //MotorState = ON;
+      // EEPROM.write(2, MotorState);
     }
 }
 
+void LevelBar(int perc)
+{
+  for (int i=0; i <= perc-1; i++)
+  {
+    lcd.setCursor(i, 1);
+    lcd.write(0);
+  }
+}
 
 void changeAutomode()  // Auto Mode ON/OFF
 {
@@ -265,11 +314,17 @@ void changeAutomode()  // Auto Mode ON/OFF
   {
     AutoMode = 0;
     EEPROM.write(3, AutoMode);
+    lcd.clear();
+    lcd.print(F(" AUTO MODE OFF"));
+    delay(1000);
   }
   else 
   {
     AutoMode = 1;
     EEPROM.write(3, AutoMode);
+    lcd.clear();
+    lcd.print(F(" AUTO MODE ON"));
+    delay(1000);
   }
 }
 
@@ -280,13 +335,18 @@ void setLowLevel()
   while(true)
   {
     if (millis() - tim_setlow > 10000) break;
-
+    lcd.setCursor(0,0);
+    lcd.print("SET LOW LEVEL");
+    lcd.setCursor(3,1);
+    lcd.print("<  " + String(LowLevel) + "%   >  ");
 
     onSw.update();
     if (onSw.isHold() == true) 
     {
       onSw.clearValue();
       EEPROM.write(4, LowLevel);
+      lcd.clear();
+      lcd.print("Low Level Stored...");
       break;
     }
     else if (onSw.isPressed() == true) 
@@ -309,4 +369,42 @@ void setLowLevel()
     
 }
 
+String strSpace(int g)
+{
+  switch (g) {
+    case 0:
+    return "";
+    break;
+  case 1:
+    return " ";
+    break;
+  case 2:
+    return "  ";
+    break;
+  case 3:
+    return "   ";
+    break;
+  case 4:
+    return "    ";
+    break;
+  case 5:
+    return "     ";
+    break;
+  case 6:
+    return "      ";
+    break;
+  case 7:
+    return "       ";
+    break;
+  case 8:
+    return "        ";
+    break;
+  case 9:
+    return "         ";
+    break;
+  case 10:
+    return "          ";
+    break;
+  }
 }
+
