@@ -23,14 +23,14 @@
 int ampDelay = 5000;
 int lcdbcklit = 20000;
 int songOrder = 1;
-int songCount = 30;
+int songCount = 35;
 
 SoftwareSerial mySoftwareSerial(2, 3); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 IRrecv irrecv(7);
 decode_results results;
-RTC_DS1307 rtc;
+RTC_DS3231 rtc;
 int vol = 20;
 String timeNow;
 int i = 1;
@@ -114,7 +114,7 @@ void setup()
     abort();
   }
 
-  if (!rtc.isrunning())
+  if (rtc.lostPower())
   {
     lcd.clear();
     lcd.print(F("ERR 02"));
