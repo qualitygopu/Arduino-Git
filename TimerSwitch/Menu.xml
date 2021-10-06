@@ -8,21 +8,22 @@
         <Item Id="SetDate" Name="SET DATE"/>
         <Item Id="SetMonth" Name="SET MONTH"/>
         <Item Id="SetYear" Name="SET YEAR"/>
-        <Item Id="SetHour" Name="SET HRS(0-24)"/>
+        <Item Id="SetHour" Name="SET HRS"/>
         <Item Id="SetMin" Name="SET MINS"/>
       </MenuItems>
     </Item>
-    <Item Id="BellSet" Name="BELL SETTING">
+    <Item Id="Timer1Set" Name="TIMR1 SETTING">
       <MenuItems>
-        <Item Id="StartTime" Name="START TIME"/>
-        <Item Id="EndTime" Name="END TIME"/>
-        <Item Id="SongCount" Name="SONG COUNT"/>
-        <Item Id="BakLitDur" Name="BACKLIGHT DUR"/>
-        <Item Id="Volume" Name="VOLUME"/>
-        <Item Id="PlayDemo" Name="PLAY DEMO">
+        <Item Id="OnTime" Name="ON TIME">
           <MenuItems>
-            <Item Id="selectTime" Name="SELECT TIME"/>
-            <Item Id="Play" Name="PLAY"/>
+            <Item Id="t1onHour" Name="SET HRS"/>
+            <Item Id="t1onMin" Name="SET MINS"/>
+          </MenuItems>
+        </Item>
+        <Item Id="OffTime" Name="OFF TIME">
+          <MenuItems>
+            <Item Id="t1offHour" Name="SET HRS"/>
+            <Item Id="t1offMin" Name="SET MINS"/>
           </MenuItems>
         </Item>
       </MenuItems>

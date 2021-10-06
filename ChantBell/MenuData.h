@@ -25,12 +25,21 @@ enum sampleMenuCommandId
   mnuCmdBellSet,
   mnuCmdStartTime,
   mnuCmdEndTime,
-  mnuCmdSongCount,
+  mnuCmdSlogamCount,
   mnuCmdBakLitDur,
   mnuCmdVolume,
   mnuCmdPlayDemo,
   mnuCmdselectTime,
-  mnuCmdPlay
+  mnuCmdPlay,
+  mnuCmdSongSetting,
+  mnuCmdMorSong1Time,
+  mnuCmdMorSong2Time,
+  mnuCmdEveSong1Time,
+  mnuCmdEveSong2Time,
+  mnuCmdSongCount,
+  mnuCmdMorSongNo,
+  mnuCmdEveSongNo,
+  mnuCmdReset    
 };
 
 PROGMEM const char sampleMenu_back[] = "BACK";
@@ -38,26 +47,61 @@ PROGMEM const char sampleMenu_exit[] = "EXIT";
 
 PROGMEM const char sampleMenu_2_6_1[] = "1 SELECT TIME";
 PROGMEM const char sampleMenu_2_6_2[] = "2 PLAY";
-PROGMEM const MenuItem sampleMenu_List_2_6[] = {{mnuCmdselectTime, sampleMenu_2_6_1}, {mnuCmdPlay, sampleMenu_2_6_2}, {mnuCmdBack, sampleMenu_back}};
+PROGMEM const MenuItem sampleMenu_List_2_6[] = {{mnuCmdselectTime, sampleMenu_2_6_1}, 
+                                                {mnuCmdPlay, sampleMenu_2_6_2}, 
+                                                {mnuCmdBack, sampleMenu_back}};
+
+PROGMEM const char sampleMenu_2_7_1[] = "MOR SONG 1 TIME";
+PROGMEM const char sampleMenu_2_7_2[] = "MOR SONG 1 No.";
+PROGMEM const char sampleMenu_2_7_3[] = "EVE SONG 1 TIME";
+PROGMEM const char sampleMenu_2_7_4[] = "EVE SONG 1 No.";
+PROGMEM const char sampleMenu_2_7_5[] = "MOR SONG 2 TIME";
+PROGMEM const char sampleMenu_2_7_6[] = "EVE SONG 2 TIME";
+PROGMEM const char sampleMenu_2_7_7[] = "SONG COUNT";
+PROGMEM const MenuItem sampleMenu_List_2_7[] = {{mnuCmdMorSong1Time, sampleMenu_2_7_1},
+                                                {mnuCmdMorSongNo, sampleMenu_2_7_2},
+                                                {mnuCmdEveSong1Time, sampleMenu_2_7_3}, 
+                                                {mnuCmdEveSongNo, sampleMenu_2_7_4},
+                                                {mnuCmdMorSong2Time, sampleMenu_2_7_5}, 
+                                                {mnuCmdEveSong2Time,sampleMenu_2_7_6},
+                                                {mnuCmdSongCount, sampleMenu_2_7_7},
+                                                {mnuCmdBack, sampleMenu_back}};
 
 PROGMEM const char sampleMenu_1_1[] = "1 SET DATE";
 PROGMEM const char sampleMenu_1_2[] = "2 SET MONTH";
 PROGMEM const char sampleMenu_1_3[] = "3 SET YEAR";
 PROGMEM const char sampleMenu_1_4[] = "4 SET HRS";
 PROGMEM const char sampleMenu_1_5[] = "5 SET MINS";
-PROGMEM const MenuItem sampleMenu_List_1[] = {{mnuCmdSetDate, sampleMenu_1_1}, {mnuCmdSetMonth, sampleMenu_1_2}, {mnuCmdSetYear, sampleMenu_1_3}, {mnuCmdSetHour, sampleMenu_1_4}, {mnuCmdSetMin, sampleMenu_1_5}, {mnuCmdBack, sampleMenu_back}};
+PROGMEM const MenuItem sampleMenu_List_1[] = {{mnuCmdSetDate, sampleMenu_1_1}, 
+                                              {mnuCmdSetMonth, sampleMenu_1_2}, 
+                                              {mnuCmdSetYear, sampleMenu_1_3}, 
+                                              {mnuCmdSetHour, sampleMenu_1_4}, 
+                                              {mnuCmdSetMin, sampleMenu_1_5}, 
+                                              {mnuCmdBack, sampleMenu_back}};
 
 PROGMEM const char sampleMenu_2_1[] = "1 START TIME";
 PROGMEM const char sampleMenu_2_2[] = "2 END TIME";
-PROGMEM const char sampleMenu_2_3[] = "3 SONG COUNT";
+PROGMEM const char sampleMenu_2_3[] = "3 SLOGAM COUNT";
 PROGMEM const char sampleMenu_2_4[] = "4 BACKLIGHT DUR";
 PROGMEM const char sampleMenu_2_5[] = "5 VOLUME";
 PROGMEM const char sampleMenu_2_6[] = "6 PLAY DEMO";
-PROGMEM const MenuItem sampleMenu_List_2[] = {{mnuCmdStartTime, sampleMenu_2_1}, {mnuCmdEndTime, sampleMenu_2_2}, {mnuCmdSongCount, sampleMenu_2_3}, {mnuCmdBakLitDur, sampleMenu_2_4}, {mnuCmdVolume, sampleMenu_2_5}, {mnuCmdPlayDemo, sampleMenu_2_6, sampleMenu_List_2_6, menuCount(sampleMenu_List_2_6)}, {mnuCmdBack, sampleMenu_back}};
+PROGMEM const char sampleMenu_2_7[] = "7 SONG SETTING";
+PROGMEM const char sampleMenu_2_8[] = "8 RESET SETTING";
+PROGMEM const MenuItem sampleMenu_List_2[] = {{mnuCmdStartTime, sampleMenu_2_1}, 
+                                              {mnuCmdEndTime, sampleMenu_2_2}, 
+                                              {mnuCmdSlogamCount, sampleMenu_2_3}, 
+                                              {mnuCmdBakLitDur, sampleMenu_2_4}, 
+                                              {mnuCmdVolume, sampleMenu_2_5}, 
+                                              {mnuCmdPlayDemo, sampleMenu_2_6, sampleMenu_List_2_6, menuCount(sampleMenu_List_2_6)}, 
+                                              {mnuCmdSongSetting, sampleMenu_2_7, sampleMenu_List_2_7, menuCount(sampleMenu_List_2_7)},
+                                              {mnuCmdReset, sampleMenu_2_8}, 
+                                              {mnuCmdBack, sampleMenu_back}};
 
 PROGMEM const char sampleMenu_1[] = "1 SET DATE TIME";
 PROGMEM const char sampleMenu_2[] = "2 BELL SETTING";
-PROGMEM const MenuItem sampleMenu_Root[] = {{mnuCmdSetDateTime, sampleMenu_1, sampleMenu_List_1, menuCount(sampleMenu_List_1)}, {mnuCmdBellSet, sampleMenu_2, sampleMenu_List_2, menuCount(sampleMenu_List_2)}, {mnuCmdBack, sampleMenu_exit}};
+PROGMEM const MenuItem sampleMenu_Root[] = {{mnuCmdSetDateTime, sampleMenu_1, sampleMenu_List_1, menuCount(sampleMenu_List_1)}, 
+                                            {mnuCmdBellSet, sampleMenu_2, sampleMenu_List_2, menuCount(sampleMenu_List_2)}, 
+                                            {mnuCmdBack, sampleMenu_exit}};
 
 /*
 case mnuCmdSetDate :

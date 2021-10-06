@@ -65,34 +65,15 @@ char *Config::getFormattedStr(byte cmdId)
     break;
   case mnuCmdSetHour:
   case mnuCmdSetMin:
-    toTimeStr(strbuf, ((StHr*60L) + StMin));
+    toTimeStr(strbuf, ((StHr * 60L) + StMin));
     break;
-  case mnuCmdStartTime:
-    inttostr(intbuf, (startTime > 12 ? startTime-12 : startTime));
-    lpad(h, intbuf, '0', 2);
-    fmt(strbuf, 2, h, startTime >= 12 ? ":00 PM" : ":00 AM");
+  case mnuCmdt1onHour:
+  case mnuCmdt1onMin:
+    toTimeStr(strbuf, timer1On);
     break;
-  case mnuCmdEndTime:
-    inttostr(intbuf, (endTime > 12 ? endTime - 12 : endTime));
-    lpad(h, intbuf, '0', 2);
-    fmt(strbuf, 2, h, endTime >= 12 ? ":00 PM" : ":00 AM");
-    break;
-  case mnuCmdSongCount:
-    fmt(strbuf, 2, inttostr(intbuf, SongCount), " Songs");
-    break;
-  case mnuCmdBakLitDur:
-    fmt(strbuf, 2, inttostr(intbuf, backLightDur), " Seconds");
-    break;
-  case mnuCmdVolume:
-    fmt(strbuf, 1, inttostr(intbuf, vol));
-    break;
-  case mnuCmdselectTime:
-    inttostr(intbuf, (demoTime > 12 ? demoTime-12 : demoTime));
-    lpad(h, intbuf, '0', 2);
-    fmt(strbuf, 2, h, demoTime >= 12 ? ":00 PM" : ":00 AM");
-    break;
-  case mnuCmdPlay:
-    fmt(strbuf, 2, "Play", " Demo >");
+  case mnuCmdt1offHour:
+  case mnuCmdt1offMin:
+    toTimeStr(strbuf, timer1Off);
     break;
   default:
     strcpy(strbuf, NotImp);
@@ -104,23 +85,19 @@ char *Config::getFormattedStr(byte cmdId)
 void Config::setDefaults()
 {
   strcpy(appNameAndVersion, NameAndVersion);
-  SongCount = 100;
-  startTime = 6; //5AM
-  endTime = 10; // 10PM
-  backLightDur = 20; //Sec
-  vol = 20;
-  SongOrder = 1;
+  timer1On = 18 * 60;
+  timer1Off = 6 * 60;
 }
 
 void Config::save()
 {
-  eeprom_write_block(this, (void *)0, sizeof (Config));
+  eeprom_write_block(this, (void *)0, sizeof(Config));
 }
 
 void Config::load()
 {
   // Attempt to load config from EEPROM
-  eeprom_read_block(this, (void *)0, sizeof (Config));
+  eeprom_read_block(this, (void *)0, sizeof(Config));
   if (strcmp(this->appNameAndVersion, NameAndVersion) != 0)
   {
     setDefaults();

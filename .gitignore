@@ -24,3 +24,55 @@ Water Level/Control_Unit_New/.vscode/arduino.json
 Water Level/Tank_Unit/.vscode/arduino.json
 LCDMenu/lcdMenu/.vscode/c_cpp_properties.json
 LCDMenu/lcdMenu/.vscode/c_cpp_properties.json
+Ardiuno.code-workspace
+ChantBell/.vscode/arduino.json
+ChantBell/.vscode/c_cpp_properties.json
+ChantBell/build/build.options.json
+ChantBell/build/ChantBell.ino.eep
+ChantBell/build/ChantBell.ino.elf
+ChantBell/build/ChantBell.ino.hex
+ChantBell/build/ChantBell.ino.with_bootloader.bin
+ChantBell/build/ChantBell.ino.with_bootloader.hex
+ChantBell/build/includes.cache
+ChantBell/build/core/core.a
+TimerSwitch/.vscode/arduino.json
+TimerSwitch/.vscode/c_cpp_properties.json
+TimerSwitch/build/build.options.json
+TimerSwitch/build/includes.cache
+TimerSwitch/build/TimerSwitch.ino.eep
+TimerSwitch/build/TimerSwitch.ino.elf
+TimerSwitch/build/TimerSwitch.ino.hex
+TimerSwitch/build/TimerSwitch.ino.with_bootloader.bin
+TimerSwitch/build/TimerSwitch.ino.with_bootloader.hex
+TimerSwitch/build/core/core.a
+Water_Level_7Segment/Proteus/Backup Of WaterLevel_5.1.pdsbak
+Water_Level_7Segment/Proteus/bestsave.rte
+Water_Level_7Segment/Proteus/Last Loaded WaterLevel_5.1.pdsbak
+Water_Level_7Segment/Proteus/WaterLevel_5.1.DO
+Water_Level_7Segment/Proteus/WaterLevel_5.1.EDF
+Water_Level_7Segment/Proteus/WaterLevel_5.1.log
+Water_Level_7Segment/Proteus/WaterLevel_5.1.PDF
+Water_Level_7Segment/Proteus/WaterLevel_5.1.pdsprj
+Water_Level_7Segment/Proteus/WaterLevel_5.1.pdsprj.GOPU.Gopu.workspace
+Water_Level_7Segment/Proteus/WaterLevel_5.1.sts
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 09-43-34].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 11-55-01].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 12-04-21].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210706, 08-38-12].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210707, 09-25-55].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210708, 08-51-30].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [Autosaved].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 09-43-34].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 11-55-01].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 12-04-21].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210706, 08-38-12].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210707, 09-25-55].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210708, 08-51-30].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [Autosaved].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 09-43-34].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 11-55-01].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210704, 12-04-21].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210706, 08-38-12].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210707, 09-25-55].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [20210708, 08-51-30].pdsprj
+Water_Level_7Segment/Proteus/Project Backups/WaterLevel_5.1 [Autosaved].pdsprj

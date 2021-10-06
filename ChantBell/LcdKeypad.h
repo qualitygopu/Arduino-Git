@@ -9,7 +9,14 @@
 #define LCD_ROWS  2
 #define LCD_COLS  16
 
+//Button Pins
+#define SELECT_BUT  9
+#define UP_BUT      10
+#define DOWN_BUT    11
+#define BACK_BUT    12
+
 #define BUTTON_PIN  A0
+
 #define BACKLIGHT_PIN 10
 
 // button state indicators
@@ -21,10 +28,10 @@
 // Button values must be assigned in ascending order as the analog values.
 // The analog values must be declared in ascending order in buttonValues[] in LcdKeypad.cpp.
 
-#define BUTTON_SELECT_PRESSED        (1 |  BUTTON_PRESSED_IND)
-#define BUTTON_SELECT_SHORT_RELEASE  (1 |  BUTTON_SHORT_RELEASE_IND)
-#define BUTTON_SELECT_LONG_PRESSED   (1 |  BUTTON_LONG_PRESSED_IND)
-#define BUTTON_SELECT_LONG_RELEASE   (1 |  BUTTON_LONG_RELEASE_IND)
+#define BUTTON_SELECT_PRESSED        (1 |  BUTTON_PRESSED_IND) //1
+#define BUTTON_SELECT_SHORT_RELEASE  (1 |  BUTTON_SHORT_RELEASE_IND) //65
+#define BUTTON_SELECT_LONG_PRESSED   (1 |  BUTTON_LONG_PRESSED_IND) //128
+#define BUTTON_SELECT_LONG_RELEASE   (1 |  BUTTON_LONG_RELEASE_IND) //193
 #define BUTTON_SELECT_ANALOG_VALUE  60
 
 #define BUTTON_UP_PRESSED         (2 |  BUTTON_PRESSED_IND)
@@ -50,8 +57,6 @@
 #define BUTTON_RIGHT_LONG_PRESSED    (5 |  BUTTON_LONG_PRESSED_IND)
 #define BUTTON_RIGHT_LONG_RELEASE    (5 |  BUTTON_LONG_RELEASE_IND)
 #define BUTTON_RIGHT_ANALOG_VALUE  800
-
-#define OPEN_MENU 12
 
 extern void queueButton (byte button);
 extern byte getButton ();

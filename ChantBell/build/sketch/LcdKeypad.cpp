@@ -4,12 +4,14 @@
 #define BUTTON_REPEAT_DELAY         3000
 #define BUTTON_REPEAT_SPEED_DELAY   250
 
-const int buttonValues[] = {BUTTON_SELECT_ANALOG_VALUE,
-                            BUTTON_UP_ANALOG_VALUE,
-                            BUTTON_DOWN_ANALOG_VALUE,
-                            BUTTON_LEFT_ANALOG_VALUE,
-                            BUTTON_RIGHT_ANALOG_VALUE
-                            };
+const byte buttonValues[] = {0,1,2,3,4};
+
+// const int buttonValues[] = {BUTTON_SELECT_ANALOG_VALUE,
+//                             BUTTON_UP_ANALOG_VALUE,
+//                             BUTTON_DOWN_ANALOG_VALUE,
+//                             BUTTON_LEFT_ANALOG_VALUE,
+//                             BUTTON_RIGHT_ANALOG_VALUE
+//                             };
 
 byte buttonBuffer[5];
 char buttonBufferCount = 0;
@@ -195,6 +197,7 @@ char *padc (char chr, unsigned char count)
 // ----------------------------------------------------------------------------------------------------
 void queueButton (byte button)
 {
+  // Serial.println(button);
   if (buttonBufferCount <= sizeof (buttonBuffer))
   {
     buttonBuffer [button_write_pos] = button;
@@ -238,12 +241,22 @@ void buttonHandlerCycle()
     buttonSampleTime = millis();
     
     byte btnStateNow;
-    int analogReading = analogRead (A0);
+    // int analogReading = analogRead (BUTTON_PIN);
+
+    byte curBut=255;
+    if (digitalRead(SELECT_BUT) == LOW) curBut = 0;
+    if (digitalRead(UP_BUT) == LOW) curBut = 1;
+    if (digitalRead(DOWN_BUT) == LOW) curBut = 2;
+    if (digitalRead(BACK_BUT) == LOW) curBut = 3;
+
+    
+
     byte buttonIdentified = 0;
     
     for (int i=0; i < 5; i++)
     {
-      if (!buttonIdentified && analogReading <  buttonValues[i])
+      // if (!buttonIdentified && analogReading <  buttonValues[i])         //analog 1 wire buttons
+      if (!buttonIdentified && curBut ==  buttonValues[i])
       {
         btnStateNow = 1;
         buttonIdentified = 1;

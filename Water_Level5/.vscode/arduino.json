@@ -1,7 +1,0 @@
-{
-    "board": "arduino:avr:uno",
-    "port": "COM8",
-    "output": "./build",
-    "sketch": "Water_Level5.ino",
-    "programmer": "arduino:arduinoasisp"
-}

@@ -16,7 +16,11 @@ unsigned long timrAmp, timrLCD, timr_Time, timrMNU;
 SoftwareSerial mySoftwareSerial(2, 3); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-RTC_DS3231 rtc;
+
+// RTC_DS3231 rtc;
+RTC_DS1307 rtc;
+
+
 MenuManager Menu1(sampleMenu_Root, menuCount(sampleMenu_Root));
 Config config;
 
@@ -45,9 +49,13 @@ void showTime();
 
 void setup()
 {
-    Serial.begin(9600);
+    //Serial.begin(9600);
     pinMode(AMP, OUTPUT);
     pinMode(STA_PIN, INPUT_PULLUP);
+    pinMode(SELECT_BUT, INPUT_PULLUP);
+    pinMode(UP_BUT, INPUT_PULLUP);
+    pinMode(DOWN_BUT, INPUT_PULLUP);
+    pinMode(BACK_BUT, INPUT_PULLUP);
     Wire.begin();
     lcd.init();
     lcd.backlight();
@@ -66,7 +74,9 @@ void setup()
         lcd.print(F("ERR 01")); // Couldn't find RTC
     }
 
-    if (rtc.lostPower())
+    // if (rtc.lostPower())
+
+    if (!rtc.isrunning())
     {
         lcd.clear();
         lcd.print(F("ERR 02"));
@@ -87,6 +97,7 @@ void setup()
      }
   lcd.clear();    
   timrLCD = millis();  
+//   rtc.adjust(DateTime(2021,07,18,17,59,57));
 }
 void loop()
 {
@@ -106,7 +117,7 @@ void loop()
             refreshMenuDisplay(REFRESH_DESCEND);
             timrMNU = millis();
         }
-        if (rtc.now().minute() == 0 && rtc.now().second() == 0)
+        if (rtc.now().minute() == 0 && rtc.now().second() == 0 && millis() > timrAmp + 61000L)
         {
             int hr = rtc.now().hour();
             if (hr >= config.startTime && hr <= config.endTime) // chek time
@@ -134,6 +145,7 @@ void loop()
         lcd.print("CHANT PLAYING...");
         if (millis() >= timrAmp + ampDelay)
             PlayChant(rtc.now().hour());
+        break;
     }
     case APP_MENU_MODE:
     {
@@ -203,7 +215,7 @@ void loop()
         lcd.setCursor(0, 0);
         lcd.print(F("  RUNNING DEMO  "));
         lcd.setCursor(0, 1);
-        lcd.print("DEMO TIME : " + String(demoTime) + String(demoTime >= 12 ? " PM" : " AM"));
+        lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime-12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
         digitalWrite(AMP, HIGH);
         delay(1000);
         PlayChant(demoTime);
@@ -212,54 +224,12 @@ void loop()
           playSong = 9;
           myDFPlayer.stop();
         }
+    break;
     }
     }
 }
 
-void PlayChant(short hr)
-{
-    switch (playSong)
-    {
-    case 1:
-        if (digitalRead(STA_PIN))
-        {
-            myDFPlayer.playMp3Folder(0);
-            delay(1000);
-            playSong = 2;
-        }
-        break;
-    case 2:
-        if (digitalRead(STA_PIN))
-        {
-            myDFPlayer.playFolder(1, hr);
-            delay(1000);
-            playSong = 3;
-        }
-        break;
-    case 3:
-        if (digitalRead(STA_PIN))
-        {
-            myDFPlayer.playMp3Folder(config.SongOrder);
-            config.SongOrder++;
-            if (config.SongOrder > config.SongCount)
-                config.SongOrder = 1;
-            config.save();
-            delay(1000);
-            playSong = 9;
-        }
-        break;
-    case 9:
-        if (digitalRead(STA_PIN))
-        {
-            playSong = 1;
-            lcd.clear();
-            appMode = APP_NORMAL_MODE;
-            timrLCD = millis();
-            digitalWrite(AMP, LOW);
-        }
-        break;
-    }
-}
+
 
 void showTime()
 {
@@ -444,16 +414,16 @@ byte processMenuCommand(byte cmdId)
         }
         break;
     }
-    case mnuCmdSongCount:
+    case mnuCmdSlogamCount:
     {
         configChanged = true;
         if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
         {
-            config.SongCount = ++config.SongCount;
+            config.SlogamCount = ++config.SlogamCount;
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            config.SongCount = --config.SongCount < 0 ? 100 : config.SongCount;
+            config.SlogamCount = --config.SlogamCount < 0 ? 100 : config.SlogamCount;
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
@@ -513,11 +483,11 @@ byte processMenuCommand(byte cmdId)
         configChanged = true;
         if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
         {
-            demoTime = ++demoTime > 11 ? 4 : demoTime;
+            demoTime = ++demoTime > 23 ? 4 : demoTime;
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            demoTime = --demoTime < 4 ? 11 : demoTime;
+            demoTime = --demoTime < 4 ? 23 : demoTime;
         }
         else
         {
@@ -526,10 +496,173 @@ byte processMenuCommand(byte cmdId)
         break;
     }
     case mnuCmdPlay:
+    {
         Menu1.reset();
         appMode = APP_DEMO_MODE;
         lcd.clear();
         break;
+    }
+    case mnuCmdMorSong1Time:
+    {
+        configChanged = true;
+        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        {
+            config.MorSong1Time = ++config.MorSong1Time > 8 ? 3 : config.MorSong1Time;
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            config.MorSong1Time = --config.MorSong1Time < 3 ? 8 : config.MorSong1Time;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            config.save();
+        }
+        else
+        {
+            configChanged = false;
+        }
+        break;
+    }
+    case mnuCmdEveSong1Time:
+    {
+        configChanged = true;
+        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        {
+            config.EveSong1Time = ++config.EveSong1Time > 8 ? 3 : config.EveSong1Time;
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            config.EveSong1Time = --config.EveSong1Time < 3 ? 8 : config.EveSong1Time;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            config.save();
+        }
+        else
+        {
+            configChanged = false;
+        }
+        break;
+    }
+    case mnuCmdMorSong2Time:
+    {
+        configChanged = true;
+        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        {
+            config.MorSong2Time = ++config.MorSong2Time > 8 ? 3 : config.MorSong2Time;
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            config.MorSong2Time = --config.MorSong2Time < 3 ? 8 : config.MorSong2Time;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            config.save();
+        }
+        else
+        {
+            configChanged = false;
+        }
+        break;
+    }
+    case mnuCmdEveSong2Time:
+    {
+        configChanged = true;
+        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        {
+            config.EveSong2Time = ++config.EveSong2Time > 8 ? 3 : config.EveSong2Time;
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            config.EveSong2Time = --config.EveSong2Time < 3 ? 8 : config.EveSong2Time;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            config.save();
+        }
+        else
+        {
+            configChanged = false;
+        }
+        break;
+    }
+    case mnuCmdSongCount:
+    {
+        configChanged = true;
+        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        {
+            config.SongCount = ++config.SongCount;
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            config.SongCount = --config.SongCount < 0 ? 100 : config.SongCount;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            config.save();
+        }
+        else
+        {
+            configChanged = false;
+        }
+        break;
+    }
+    case mnuCmdMorSongNo:
+    {
+        configChanged = true;
+        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        {
+            config.MorSongNo = ++config.MorSongNo > 20 ? 1 : config.MorSongNo;
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            config.MorSongNo = --config.MorSongNo < 1 ? 20 : config.MorSongNo;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            config.save();
+        }
+        else
+        {
+            configChanged = false;
+        }
+        break;
+    }
+    case mnuCmdEveSongNo:
+    {
+        configChanged = true;
+        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        {
+            config.EveSongNo = ++config.EveSongNo > 20 ? 1 : config.EveSongNo;
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            config.EveSongNo = --config.EveSongNo < 1 ? 20 : config.EveSongNo;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            config.save();
+        }
+        else
+        {
+            configChanged = false;
+        }
+        break;
+    }
+    case mnuCmdReset:
+    {
+      if (btn == BUTTON_SELECT_LONG_PRESSED)
+      {
+        config.setDefaults();
+        lcd.setCursor(1, 1);
+        lcd.print("Defaults loaded");
+      }
+      else if (btn == BUTTON_SELECT_LONG_RELEASE)
+      {
+        complete = true;
+      }
+      break;
+    }
     }
     if (configChanged)
     {
@@ -556,6 +689,7 @@ byte getNavAction()
 }
 
 const char EmptyStr[] = "";
+
 void refreshMenuDisplay(byte refreshMode)
 {
     char nameBuf[LCD_COLS + 1];
@@ -588,5 +722,91 @@ void refreshMenuDisplay(byte refreshMode)
             lcd.print(" ");
             lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
         }
+    }
+}
+
+int n = 1;
+void PlayChant(short hr)
+{
+    // Serial.println(String(hr));
+    switch (playSong)
+    {
+    case 1:
+        if (digitalRead(STA_PIN))
+        {
+            myDFPlayer.playMp3Folder(0);
+            delay(1000);
+            playSong = 2;
+        }
+        break;
+        //  if (digitalRead(STA_PIN))
+        // {
+        //     myDFPlayer.playFolder(3, n);
+        //     n = ++n > 3 ? 1 : n;
+        //     delay(1000);
+        //     playSong = 2;
+        // }
+        // break;
+    case 2:
+        if (digitalRead(STA_PIN))
+        {
+            myDFPlayer.playFolder(1, hr);
+            delay(1000);
+            playSong = 3;
+        }
+        break;
+    case 3:
+        if (digitalRead(STA_PIN))
+        {
+            if (config.MorSong1Time == hr && config.MorSong1Time != 3)
+            {
+                myDFPlayer.playFolder(2,  config.MorSongNo);
+                delay(1000);
+            }
+            else if (config.MorSong2Time == hr && config.MorSong2Time != 3)
+            {
+                myDFPlayer.playFolder(4, config.SongOrder);
+                config.SongOrder++;
+                if (config.SongOrder > config.SongCount)
+                    config.SongOrder = 1;
+                config.save();
+                delay(1000);
+            }
+            else if ((config.EveSong1Time + 12) == hr && (config.EveSong1Time != 3)) 
+            {
+                myDFPlayer.playFolder(2,  config.EveSongNo);
+                delay(1000);
+            }
+            else if ((config.EveSong2Time + 12) == hr && (config.EveSong2Time != 3))
+            {
+                myDFPlayer.playFolder(4, config.SongOrder);
+                config.SongOrder++;
+                if (config.SongOrder > config.SongCount)
+                    config.SongOrder = 1;
+                config.save();
+                delay(1000);
+            }
+            else 
+            {
+              myDFPlayer.playMp3Folder(config.SlogamOrder);
+              config.SlogamOrder++;
+              if (config.SlogamOrder > config.SlogamCount)
+                  config.SlogamOrder = 1;
+              config.save();
+              delay(1000);
+            } 
+            playSong = 9;
+        }
+        break;
+    case 9:
+        if (digitalRead(STA_PIN))
+        {
+            playSong = 1;
+            lcd.clear();
+            appMode = APP_NORMAL_MODE;
+            timrLCD = millis();
+            digitalWrite(AMP, LOW);
+        }
+        break;
     }
 }

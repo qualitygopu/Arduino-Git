@@ -77,8 +77,8 @@ char *Config::getFormattedStr(byte cmdId)
     lpad(h, intbuf, '0', 2);
     fmt(strbuf, 2, h, endTime >= 12 ? ":00 PM" : ":00 AM");
     break;
-  case mnuCmdSongCount:
-    fmt(strbuf, 2, inttostr(intbuf, SongCount), " Songs");
+  case mnuCmdSlogamCount:
+    fmt(strbuf, 2, inttostr(intbuf, SlogamCount), " Songs");
     break;
   case mnuCmdBakLitDur:
     fmt(strbuf, 2, inttostr(intbuf, backLightDur), " Seconds");
@@ -94,6 +94,34 @@ char *Config::getFormattedStr(byte cmdId)
   case mnuCmdPlay:
     fmt(strbuf, 2, "Play", " Demo >");
     break;
+  case mnuCmdMorSong1Time:
+    fmt(strbuf, 2, MorSong1Time == 3 ? "OFF" : inttostr(intbuf, MorSong1Time), MorSong1Time == 3 ? "" : " AM");
+    break;
+  case mnuCmdMorSong2Time:
+    fmt(strbuf, 2, MorSong2Time == 3 ? "OFF" : inttostr(intbuf, MorSong2Time), MorSong2Time == 3 ? "" : " AM");
+    break;
+  case mnuCmdEveSong1Time:
+    fmt(strbuf, 2, EveSong1Time == 3 ? "OFF" : inttostr(intbuf, EveSong1Time), EveSong1Time == 3 ? "" : " PM");
+    break;
+  case mnuCmdEveSong2Time:
+    fmt(strbuf, 2, EveSong2Time == 3 ? "OFF" : inttostr(intbuf, EveSong2Time), EveSong2Time == 3 ? "" : " PM");
+    break;
+  case mnuCmdSongCount:
+    fmt(strbuf, 2, inttostr(intbuf, SongCount), " Songs");
+    break;
+  case mnuCmdMorSongNo:
+    inttostr(intbuf, MorSongNo);
+    lpad(h, intbuf, '0', 3);
+    fmt(strbuf, 1, h);
+    break;
+  case mnuCmdEveSongNo:
+    inttostr(intbuf, EveSongNo);
+    lpad(h, intbuf, '0', 3);
+    fmt(strbuf, 1, h);
+    break;
+  case mnuCmdReset:
+    strbuf[0] = 0;
+    break;
   default:
     strcpy(strbuf, NotImp);
     break;
@@ -104,12 +132,20 @@ char *Config::getFormattedStr(byte cmdId)
 void Config::setDefaults()
 {
   strcpy(appNameAndVersion, NameAndVersion);
-  SongCount = 100;
-  startTime = 6; //5AM
-  endTime = 10; // 10PM
+  SlogamCount = 100;
+  startTime = 5; //5AM
+  endTime = 22; // 10PM
   backLightDur = 20; //Sec
   vol = 20;
+  SlogamOrder = 1;
+  SongCount = 10;
   SongOrder = 1;
+  MorSong1Time = 3;
+  MorSong2Time = 3;
+  EveSong2Time = 3;
+  EveSong1Time = 3;
+  MorSongNo = 1;
+  EveSongNo = 2;
 }
 
 void Config::save()

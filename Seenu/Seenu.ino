@@ -1,5 +1,7 @@
+#include <LiquidCrystal.h>
+
 #include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
+// #include <LiquidCrystal_I2C.h>
 #include <EEPROM.h>
 #include <RTClib.h>
 
@@ -7,11 +9,12 @@
 #define BUT2    3
 #define BUT3    4
 #define BUT4    5
-#define MOTOR   8
-#define SPRAY   9
-#define BUZZR   7
-
-LiquidCrystal_I2C lcd(0x27,20,4);
+#define MOTOR   9
+#define SPRAY   10
+#define BUZZR   11
+#define LCDBacklight 6
+// LiquidCrystal_I2C lcd(0x27,20,4);
+LiquidCrystal lcd(12, 13, A0, A1, A2, A3);
 RTC_DS3231 rtc;
 
 class MySwitch {
@@ -176,8 +179,10 @@ void setup()
   pinMode(MOTOR, OUTPUT);
   pinMode(SPRAY, OUTPUT);
   pinMode(BUZZR, OUTPUT);
-  lcd.init();
-  lcd.backlight();  
+  pinMode(LCDBacklight, OUTPUT);
+  lcd.begin(20,4);
+  // lcd.backlight();  
+  digitalWrite(LCDBacklight, HIGH);
   lcd.setCursor(4,1);
   lcd.print(F("SUJHATRONICS"));
   delay(1000);
@@ -237,7 +242,9 @@ void loop()
 
   if (Pow_on == true)
   {
-    lcd.backlight(); tmr_lcdlight = millis();
+    // lcd.backlight(); 
+    digitalWrite(LCDBacklight, HIGH);
+    tmr_lcdlight = millis();
     digitalWrite(BUZZR, HIGH);
     delay(300);
     digitalWrite(BUZZR, LOW);
@@ -302,13 +309,14 @@ void loop()
   
   if (millis() >= tmr_lcdlight + backLight_dur)
   {
-    lcd.noBacklight();
+    // lcd.noBacklight();
+    digitalWrite(LCDBacklight, LOW);
   }
 
-  if (digitalRead(BUT1) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
-  if (digitalRead(BUT2) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
-  if (digitalRead(BUT3) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
-  if (digitalRead(BUT4) == LOW) {lcd.backlight(); tmr_lcdlight = millis();}
+  if (digitalRead(BUT1) == LOW) {digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();}
+  if (digitalRead(BUT2) == LOW) {digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();}
+  if (digitalRead(BUT3) == LOW) {digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();}
+  if (digitalRead(BUT4) == LOW) {digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();}
 
   // Set But State
   {
@@ -455,7 +463,7 @@ void loop()
       lcd.clear();
       beep = true;
       tmr_beep = millis();
-      lcd.backlight(); tmr_lcdlight = millis();
+      digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();
     }   
   }
 
@@ -471,7 +479,7 @@ void loop()
     {
       if (sprayActive == false)
       {
-        lcd.backlight(); tmr_lcdlight = millis();
+        digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();
         Serial.println("Spray ON : " + now.timestamp());
         digitalWrite(SPRAY, HIGH);
         tim_sprTime = millis();
@@ -498,7 +506,7 @@ void loop()
       lcd.clear();
       beep = true;
       tmr_beep = millis();
-      lcd.backlight(); tmr_lcdlight = millis();
+      digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();
     }   
   }
 
@@ -514,7 +522,7 @@ void loop()
       beep = true;
       lcd.clear();
       tmr_beep = millis();
-      lcd.backlight(); tmr_lcdlight = millis();
+      digitalWrite(LCDBacklight, HIGH); tmr_lcdlight = millis();
     }   
   }
 
