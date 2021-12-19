@@ -25,25 +25,6 @@ char *toTimeStr(char *buf, long timeval, char separator)
   return buf;
 }
 
-char *toDurStr(char *buf, long timeval, char separator)
-{
-  char sepstr[] = {separator, 0};
-
-  short hours = timeval / 60;
-  short mins = timeval % 60;
-  char intbuf[8];
-  char h[3];
-  char m[3];
-
-  inttostr(intbuf, hours);
-  lpad(h, intbuf, '0', 2);
-  inttostr(intbuf, mins);
-  lpad(m, intbuf, '0', 2);
-
-  fmt(buf, 3, h, sepstr, m);
-  return buf;
-}
-
 char *toDateStr(char *buf, char separator)
 {
   char sepstr[] = {separator, 0};
@@ -138,43 +119,6 @@ char *Config::getFormattedStr(byte cmdId)
     lpad(h, intbuf, '0', 3);
     fmt(strbuf, 1, h);
     break;
-  case mnuCmdLt1OnTime:
-  case mnuCmdLt1OnHr:
-  case mnuCmdLt1OnMin:
-    toTimeStr(strbuf, Light1On);
-    break;
-  case mnuCmdLt1OffTime:  
-  case mnuCmdLt1OffHr:
-  case mnuCmdLt1OffMin:
-    toTimeStr(strbuf, Light1Off);
-    break;
-  case mnuCmdLt2OnTime:
-  case mnuCmdLt2OnHr:
-  case mnuCmdLt2OnMin:
-    toTimeStr(strbuf, Light2On);
-    break;
-  case mnuCmdLt2OffTime:
-  case mnuCmdLt2OffHr:
-  case mnuCmdLt2OffMin:
-    toTimeStr(strbuf, Light2Off);
-    break;
-  case mnuCmdPlrMorOnTime:
-  case mnuCmdPlrMorHr:
-  case mnuCmdPlrMorMin:
-    toTimeStr(strbuf, PlayerMorTime);
-    break;
-  case mnuCmdPlrMorDur:
-    toDurStr(strbuf, PlayerMorDur);
-    break;
-  case mnuCmdPlrEveOnTime:
-  case mnuCmdPlrEveHr:
-  case mnuCmdPlrEveMin:
-    toTimeStr(strbuf, PlayerEveTime);
-    break;
-  case mnuCmdPlrEveDur:
-    toDurStr(strbuf, PlayerEveDur);
-    break;
-
   case mnuCmdReset:
     strbuf[0] = 0;
     break;
@@ -188,11 +132,11 @@ char *Config::getFormattedStr(byte cmdId)
 void Config::setDefaults()
 {
   strcpy(appNameAndVersion, NameAndVersion);
-  SlogamCount = 50;
+  SlogamCount = 100;
   startTime = 5; //5AM
   endTime = 22; // 10PM
   backLightDur = 20; //Sec
-  vol = 14;
+  vol = 20;
   SlogamOrder = 1;
   SongCount = 10;
   SongOrder = 1;
@@ -202,18 +146,6 @@ void Config::setDefaults()
   EveSong1Time = 3;
   MorSongNo = 1;
   EveSongNo = 2;
-
-  Light1On = 0;
-  Light1Off = 0;
-  Light2On = 0;
-  Light2Off = 0;
-  PlayerMorTime = 0;
-  PlayerMorDur= 0;
-  PlayerEveTime = 0;
-  PlayerEveDur = 0;
-
-  AutoPlay = 0;
-  AutoLight = 0;
 }
 
 void Config::save()

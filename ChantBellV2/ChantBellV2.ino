@@ -9,19 +9,10 @@
 #include "Config.h"
 
 #define AMP A3
-#define AUTOLIGHT A0
-#define AUTOPLAY A1
 #define STA_PIN 5
-#define AUDCONT 13
 
-#define RELAY1 10
-#define RELAY2 11
-#define RELAY3 12
-
-long CurTime;
-byte Light1ON = 0, Light2ON = 0, PlayerONMor = 0, PlayerONEve = 0;
 int ampDelay = 5000;
-unsigned long timrAmp, timrLCD, timr_Time, timrMNU, timrTrigger;
+unsigned long timrAmp, timrLCD, timr_Time, timrMNU;
 SoftwareSerial mySoftwareSerial(2, 3); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -29,10 +20,12 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 // RTC_DS3231 rtc;
 RTC_DS1307 rtc;
 
+//blink time 
+bool blink = true, serviceMode = false;
+
 MenuManager Menu1(sampleMenu_Root, menuCount(sampleMenu_Root));
 Config config;
 
-bool ButLongPress = false;
 byte alarmMode = 0;
 byte playSong = 1;
 byte btn;
@@ -47,7 +40,8 @@ enum AppModeValues
     APP_PROCESS_MENU_CMD,
     APP_CHANT_MODE,
     APP_DEMO_MODE,
-    APP_PLAYER_MODE
+    APP_SETHR_MODE,
+    APP_SETMIN_MODE
 };
 byte appMode = APP_NORMAL_MODE;
 
@@ -61,12 +55,6 @@ void setup()
 {
     //Serial.begin(9600);
     pinMode(AMP, OUTPUT);
-    pinMode(AUDCONT, OUTPUT);
-    pinMode(AUTOLIGHT, OUTPUT);
-    pinMode(AUTOPLAY, OUTPUT);
-    pinMode(RELAY1, OUTPUT);
-    pinMode(RELAY2, OUTPUT);
-    pinMode(RELAY3, OUTPUT);
     pinMode(STA_PIN, INPUT_PULLUP);
     pinMode(SELECT_BUT, INPUT_PULLUP);
     pinMode(UP_BUT, INPUT_PULLUP);
@@ -81,9 +69,17 @@ void setup()
     lcd.print(F("QTRON"));
     delay(2000);
     lcd.clear();
-    lcd.setCursor(3, 0);
+    lcd.setCursor(3,0);
     lcd.print("Loading...");
     config.load();
+    if (!digitalRead(SELECT_BUT)) {
+      lcd.setCursor(0, 1);
+      lcd.print("Service Mode");  
+      serviceMode = true;    
+    }
+    else {
+      serviceMode = false;
+    }
     while (!rtc.begin())
     {
         lcd.clear();
@@ -99,6 +95,7 @@ void setup()
         delay(2000);
     }
     // Initialize DF Player...............
+    if (digitalRead(BACK_BUT))
      {
          mySoftwareSerial.begin(9600);
          delay(500);
@@ -111,91 +108,46 @@ void setup()
          myDFPlayer.volume(config.vol);
          myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
      }
-    lcd.clear();
-    timrLCD = millis();
-    //   rtc.adjust(DateTime(2021,07,18,17,59,57));
+  lcd.clear();    
+  timrLCD = millis();  
+//   rtc.adjust(DateTime(2021,07,18,17,59,57));
 }
 void loop()
 {
+  //adjust time 
+  if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
+  {
+    delay(10000);
+    rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),2));        
+  }  
     btn = getButton();
     if (btn)
-    {
-        timrLCD = millis();
-        timrMNU = millis();
-        lcd.backlight();
-    }
-    if (btn == BUTTON_UP_LONG_PRESSED)
-    {
-        if (!ButLongPress)
         {
-            if (config.AutoPlay == 0)
-            {
-                config.AutoPlay = 1;
-                lcd.setCursor(0, 1);
-                lcd.print(F("  AUTO PLAY ON  "));
-            }
-            else
-            {
-                config.AutoPlay = 0;
-                lcd.setCursor(0, 1);
-                lcd.print(F(" AUTO PLAY OFF  "));
-            }
-            digitalWrite(AUTOPLAY, config.AutoPlay);
-            delay(1000);
-            // lcd.clear();
-            config.save();
-            ButLongPress = true;
+          timrLCD = millis();
+          timrMNU = millis();
+          lcd.backlight();
         }
-    }
-    if (btn == BUTTON_DOWN_LONG_PRESSED)
-    {
-        if (!ButLongPress)
-        {
-            if (config.AutoLight == 0)
-            {
-                config.AutoLight = 1;
-                lcd.setCursor(0, 1);
-                lcd.print(F(" AUTO LIGHT ON  "));
-            }
-            else
-            {
-                config.AutoLight = 0;
-                lcd.setCursor(0, 1);
-                lcd.print(F(" AUTO LIGHT OFF "));
-            }
-            digitalWrite(AUTOLIGHT, config.AutoLight);
-            delay(1000);
-            // lcd.clear();
-            config.save();
-            ButLongPress = true;
-        }
-    }
-    if (btn == BUTTON_DOWN_LONG_RELEASE || btn == BUTTON_UP_LONG_RELEASE || btn == BUTTON_LEFT_LONG_RELEASE)
-    {
-        ButLongPress = false;
-    }
-
-    if (millis() - timrTrigger > 1000)
-    {
-        timrTrigger = millis();
-        if (config.AutoLight)
-            TriggerLights();
-    }
-    digitalWrite(AUTOLIGHT, config.AutoLight);
-    digitalWrite(AUTOPLAY, config.AutoPlay);
-
     switch (appMode)
     {
     case APP_NORMAL_MODE:
-        digitalWrite(AMP, LOW);
-        digitalWrite(AUDCONT, LOW);
-        if (btn == BUTTON_SELECT_LONG_PRESSED)
+        if (btn == BUTTON_SELECT_LONG_PRESSED && serviceMode)
         {
             appMode = APP_MENU_MODE;
             refreshMenuDisplay(REFRESH_DESCEND);
             timrMNU = millis();
         }
-
+        else if (btn == BUTTON_UP_LONG_PRESSED)
+        {
+            appMode = APP_SETHR_MODE;
+            timrMNU = millis();
+            // lcd.clear();
+        }
+        else if (btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            appMode = APP_SETMIN_MODE;
+            timrMNU = millis();
+            // lcd.clear();
+        }
         if (rtc.now().minute() == 0 && rtc.now().second() == 0 && millis() > timrAmp + 61000L)
         {
             int hr = rtc.now().hour();
@@ -211,28 +163,103 @@ void loop()
         {
             timr_Time = millis();
             showTime();
-            CurTime = (rtc.now().hour() * 60) + rtc.now().minute();
-            if (config.AutoPlay)
-                TriggerPlayer();
         }
         if (millis() - timrLCD > (config.backLightDur * 1000L))
         {
             lcd.noBacklight();
         }
-        if (btn == BUTTON_LEFT_LONG_PRESSED)
-        {
-            if (!ButLongPress)
-            {
-                appMode = APP_PLAYER_MODE;
-                lcd.clear();
-                ButLongPress = true;
-            }
-        }
         break;
+    case APP_SETHR_MODE:
+    {
+        if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            { 
+                showTime();
+                blink = false;
+            }
+            else
+            {
+                lcd.setCursor(2,0);
+                lcd.print("  ");
+                blink = true;
+            }     
+            timr_Time = millis();       
+        }
+
+        if (btn == BUTTON_UP_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour()+1,
+                                rtc.now().minute(),
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_DOWN_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour()-1,
+                                rtc.now().minute(),
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_SELECT_PRESSED || millis() - timrMNU > 10000)
+        {
+            appMode = APP_NORMAL_MODE;
+            lcd.clear();
+        }   
+        break;
+    }
+    case APP_SETMIN_MODE:
+    {
+if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            { 
+                showTime();
+                blink = false;
+            }
+            else
+            {
+                lcd.setCursor(5,0);
+                lcd.print("  ");
+                blink = true;
+            }     
+            timr_Time = millis();       
+        }
+
+        if (btn == BUTTON_UP_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour(),
+                                rtc.now().minute()+1,
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_DOWN_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour(),
+                                rtc.now().minute()-1,
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_SELECT_PRESSED || millis() - timrMNU > 10000)
+        {
+            appMode = APP_NORMAL_MODE;
+            lcd.clear();
+        }   
+        break;
+    }
+    
     case APP_CHANT_MODE:
     {
         lcd.backlight();
-        lcd.setCursor(0, 1);
+        lcd.setCursor(0,1);
         lcd.print("CHANT PLAYING...");
         if (millis() >= timrAmp + ampDelay)
             PlayChant(rtc.now().hour());
@@ -242,11 +269,11 @@ void loop()
     {
         if (millis() - timrMNU > 10000)
         {
-            Menu1.reset();
-            appMode = APP_NORMAL_MODE;
-            lcd.clear();
+          Menu1.reset();
+          appMode = APP_NORMAL_MODE;
+          lcd.clear();
         }
-
+           
         if (Menu1.getCurrentItemCmdId() == 1)
         {
             StDate = rtc.now().day();
@@ -286,10 +313,10 @@ void loop()
         byte processingComplete = processMenuCommand(Menu1.getCurrentItemCmdId());
         if (millis() - timrMNU > 10000)
         {
-            Menu1.reset();
-            appMode = APP_NORMAL_MODE;
-            lcd.clear();
-        }
+          Menu1.reset();
+          appMode = APP_NORMAL_MODE;
+          lcd.clear();
+        }      
         if (processingComplete)
         {
             appMode = APP_MENU_MODE;
@@ -306,174 +333,21 @@ void loop()
         lcd.setCursor(0, 0);
         lcd.print(F("  RUNNING DEMO  "));
         lcd.setCursor(0, 1);
-        lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime - 12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
+        lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime-12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
         digitalWrite(AMP, HIGH);
         delay(1000);
         PlayChant(demoTime);
         if (btn == BUTTON_DOWN_PRESSED)
         {
-            playSong = 9;
-            myDFPlayer.stop();
+          playSong = 9;
+          myDFPlayer.stop();
         }
-        break;
-    }
-    case APP_PLAYER_MODE:
-    {
-        digitalWrite(AMP, HIGH);
-        digitalWrite(AUDCONT, HIGH);
-        if (millis() - timr_Time > 1000)
-        {
-            timr_Time = millis();
-            showTime();
-            CurTime = (rtc.now().hour() * 60) + rtc.now().minute();
-            if (config.AutoPlay)
-                TriggerPlayer();
-        }
-        if (millis() - timrLCD > (config.backLightDur * 1000L))
-        {
-            lcd.noBacklight();
-        }
-        lcd.setCursor(0, 1);
-        lcd.print(F(" PLAYER MODE ON "));
-        if (btn == BUTTON_LEFT_LONG_PRESSED)
-        {
-            if (!ButLongPress)
-            {
-                appMode = APP_NORMAL_MODE;
-                lcd.clear();
-                ButLongPress = true;
-            }
-        }
-        break;
+    break;
     }
     }
 }
 
-void TriggerLights()
-{
-    // Validate Light 1
-    if (config.Light1On !=0 && config.Light1Off !=0)
-    {
-        if (config.Light1Off > config.Light1On)
-        {
-            if (CurTime >= config.Light1On && CurTime < config.Light1Off)
-            {
-                if (Light1ON == 0)
-                {
-                    digitalWrite(RELAY1, HIGH);
-                    Light1ON = 1;
-                }
-            }
-            else
-            {
-                if (Light1ON == 1)
-                {
-                    digitalWrite(RELAY1, LOW);
-                    Light1ON = 0;
-                }
-            }
-        }
-        else
-        {
-            if (CurTime < config.Light1On && CurTime >= config.Light1Off)
-            {
-                if (Light1ON == 1)
-                {
-                    digitalWrite(RELAY1, LOW);
-                    Light1ON = 0;
-                }
-            }
-            else
-            {
-                if (Light1ON == 0)
-                {
-                    digitalWrite(RELAY1, HIGH);
-                    Light1ON = 1;
-                }
-            }
-        }
-    }
-    // Validate Light 2
-    if (config.Light2On !=0 && config.Light2Off !=0)
-    {
-        if (config.Light2Off > config.Light2On)
-        {
-            if (CurTime >= config.Light2On && CurTime < config.Light2Off)
-            {
-                if (Light2ON == 0)
-                {
-                    digitalWrite(RELAY2, HIGH);
-                    Light2ON = 1;
-                }
-            }
-            else
-            {
-                if (Light2ON == 1)
-                {
-                    digitalWrite(RELAY2, LOW);
-                    Light2ON = 0;
-                }
-            }
-        }
-        else
-        {
-            if (CurTime < config.Light2On && CurTime >= config.Light2Off)
-            {
-                if (Light2ON == 1)
-                {
-                    digitalWrite(RELAY2, LOW);
-                    Light2ON = 0;
-                }
-            }
-            else
-            {
-                if (Light2ON == 0)
-                {
-                    digitalWrite(RELAY2, HIGH);
-                    Light2ON = 1;
-                }
-            }
-        }
-    }
-}
-void TriggerPlayer()
-{
-    // Validate Player Morning
-    if (CurTime >= config.PlayerMorTime && CurTime < config.PlayerMorTime + config.PlayerMorDur)
-    {
-        if (PlayerONMor == 0)
-        {
-            PlayerONMor = 1;
-            appMode = APP_PLAYER_MODE;
-            lcd.clear();
-        }
-    }
-    // Validate Player Evening
-    else if (CurTime >= config.PlayerEveTime && CurTime < config.PlayerEveTime + config.PlayerEveDur)
-    {
-        if (PlayerONEve == 0)
-        {
-            PlayerONEve = 1;
-            appMode = APP_PLAYER_MODE;
-            lcd.clear();
-        }
-    }
-    else
-    {
-        if (appMode == APP_PLAYER_MODE)
-        {
-          if (PlayerONEve == 1 || PlayerONMor == 1)
-          {
-            digitalWrite(AMP, LOW);
-            digitalWrite(AUDCONT, LOW);
-            PlayerONMor = 0;
-            PlayerONEve = 0;
-            lcd.clear();
-            appMode = APP_NORMAL_MODE;
-          }
-        }
-    }
-}
+
 
 void showTime()
 {
@@ -487,8 +361,8 @@ void showTime()
     inttostr(intbuf, rtc.now().second());
     lpad(s, intbuf, '0', 2);
 
-    lcd.setCursor(0, 0);
-    lcd.print(fmt(strbuf, 7, "  ", h, ":", m, ":", s, rtc.now().isPM() ? " PM   " : " AM   "));
+    lcd.setCursor(2, 0);
+    lcd.print(fmt(strbuf, 6, h, ":", m, ":", s, rtc.now().isPM() ? " PM" : " AM"));
 
     inttostr(intbuf, rtc.now().day());
     lpad(dat, intbuf, '0', 2);
@@ -496,8 +370,8 @@ void showTime()
     lpad(year, intbuf, '0', 4);
     strcpy(mon, months[rtc.now().month() - 1].c_str());
 
-    lcd.setCursor(0, 1);
-    lcd.print(fmt(strbuf, 7,"  ", dat, "-", mon, "-", year, "   "));
+    lcd.setCursor(2, 1);
+    lcd.print(fmt(strbuf, 5, dat, "-", mon, "-", year));
 }
 
 byte processMenuCommand(byte cmdId)
@@ -714,7 +588,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
-            myDFPlayer.volume(config.vol);
+            myDFPlayer.volume(config.vol);                                   
         }
         else
         {
@@ -893,313 +767,19 @@ byte processMenuCommand(byte cmdId)
         }
         break;
     }
-    case mnuCmdLt1OnHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(60, config.Light1On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(-60, config.Light1On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OnMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(1, config.Light1On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(-1, config.Light1On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(60, config.Light1Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(-60, config.Light1Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(1, config.Light1Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(-1, config.Light1Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OnHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light2On = addToTime(60, config.Light2On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light2On = addToTime(-60, config.Light2On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OnMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light2On = addToTime(1, config.Light2On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light2On = addToTime(-1, config.Light2On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OffHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light2Off = addToTime(60, config.Light2Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light2Off = addToTime(-60, config.Light2Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OffMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light2Off = addToTime(1, config.Light2Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light2Off = addToTime(-1, config.Light2Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrMorHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.PlayerMorTime = addToTime(60, config.PlayerMorTime);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.PlayerMorTime = addToTime(-60, config.PlayerMorTime);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrMorMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.PlayerMorTime = addToTime(1, config.PlayerMorTime);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.PlayerMorTime = addToTime(-1, config.PlayerMorTime);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrMorDur:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.PlayerMorDur = addToTime(5, config.PlayerMorDur);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.PlayerMorDur = addToTime(-5, config.PlayerMorDur);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.PlayerEveTime = addToTime(60, config.PlayerEveTime);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.PlayerEveTime = addToTime(-60, config.PlayerEveTime);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.PlayerEveTime = addToTime(1, config.PlayerEveTime);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.PlayerEveTime = addToTime(-1, config.PlayerEveTime);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveDur:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.PlayerEveDur = addToTime(5, config.PlayerEveDur);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.PlayerEveDur = addToTime(-5, config.PlayerEveDur);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
     case mnuCmdReset:
     {
-        if (btn == BUTTON_SELECT_LONG_PRESSED)
-        {
-            config.setDefaults();
-            lcd.setCursor(1, 1);
-            lcd.print("Defaults loaded");
-        }
-        else if (btn == BUTTON_SELECT_LONG_RELEASE)
-        {
-            complete = true;
-        }
-        break;
+      if (btn == BUTTON_SELECT_LONG_PRESSED)
+      {
+        config.setDefaults();
+        lcd.setCursor(1, 1);
+        lcd.print("Defaults loaded");
+      }
+      else if (btn == BUTTON_SELECT_LONG_RELEASE)
+      {
+        complete = true;
+      }
+      break;
     }
     }
     if (configChanged)
@@ -1221,8 +801,8 @@ byte getNavAction()
         navAction = MENU_ITEM_NEXT;
     else if (btn == BUTTON_SELECT_PRESSED)
         navAction = MENU_ITEM_SELECT;
-    else if (btn == BUTTON_LEFT_SHORT_RELEASE)
-        navAction = MENU_BACK;
+    // else if (btn == BUTTON_LEFT_PRESSED)
+    //     navAction = MENU_BACK;
     return navAction;
 }
 
@@ -1231,35 +811,21 @@ const char EmptyStr[] = "";
 void refreshMenuDisplay(byte refreshMode)
 {
     char nameBuf[LCD_COLS + 1];
-    byte cmdId;
-    cmdId = Menu1.getCurrentItemCmdId();
+
     lcd.setCursor(0, 0);
     if (Menu1.currentItemHasChildren())
     {
         rpad(strbuf, Menu1.getCurrentItemName(nameBuf));
         strbuf[LCD_COLS - 1] = 0b01111110; // Display forward arrow if this menu item has children.
         lcd.print(strbuf);
-        if (cmdId == mnuCmdLt1OnTime || 
-            cmdId == mnuCmdLt1OffTime ||
-            cmdId == mnuCmdLt2OnTime ||
-            cmdId == mnuCmdLt2OffTime ||
-            cmdId == mnuCmdPlrMorOnTime ||
-            cmdId == mnuCmdPlrEveOnTime)
-        {
-            lcd.setCursor(0, 1);
-            lcd.print(" ");
-            lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
-        }
-        else
-        {
-            lcd.setCursor(0, 1);
-            lcd.print(rpad(strbuf, EmptyStr)); // Clear config value in display
-        }
-        
+        lcd.setCursor(0, 1);
+        lcd.print(rpad(strbuf, EmptyStr)); // Clear config value in display
     }
     else
     {
+        byte cmdId;
         rpad(strbuf, Menu1.getCurrentItemName(nameBuf));
+
         if ((cmdId = Menu1.getCurrentItemCmdId()) == 0)
         {
             strbuf[LCD_COLS - 1] = 0b01111111; // Display back arrow if this menu item ascends to parent.
@@ -1285,13 +851,13 @@ void PlayChant(short hr)
     {
     case 1:
         if (digitalRead(STA_PIN))
-        {
-            myDFPlayer.playMp3Folder(0);
+        { 
+          myDFPlayer.playMp3Folder(0);
             delay(1000);
             playSong = 2;
         }
         break;
-        //  if (digitalRead(STA_PIN))
+        // if (digitalRead(STA_PIN))
         // {
         //     myDFPlayer.playFolder(3, n);
         //     n = ++n > 3 ? 1 : n;
@@ -1304,7 +870,7 @@ void PlayChant(short hr)
         {
             myDFPlayer.playFolder(1, hr);
             delay(1000);
-            playSong = 3;
+             playSong = 3;
         }
         break;
     case 3:
@@ -1312,7 +878,7 @@ void PlayChant(short hr)
         {
             if (config.MorSong1Time == hr && config.MorSong1Time != 3)
             {
-                myDFPlayer.playFolder(2, config.MorSongNo);
+                myDFPlayer.playFolder(2,  config.MorSongNo);
                 delay(1000);
             }
             else if (config.MorSong2Time == hr && config.MorSong2Time != 3)
@@ -1324,9 +890,9 @@ void PlayChant(short hr)
                 config.save();
                 delay(1000);
             }
-            else if ((config.EveSong1Time + 12) == hr && (config.EveSong1Time != 3))
+            else if ((config.EveSong1Time + 12) == hr && (config.EveSong1Time != 3)) 
             {
-                myDFPlayer.playFolder(2, config.EveSongNo);
+                myDFPlayer.playFolder(2,  config.EveSongNo);
                 delay(1000);
             }
             else if ((config.EveSong2Time + 12) == hr && (config.EveSong2Time != 3))
@@ -1338,16 +904,17 @@ void PlayChant(short hr)
                 config.save();
                 delay(1000);
             }
-            else
+            else 
             {
-                myDFPlayer.playMp3Folder(config.SlogamOrder);
-                config.SlogamOrder++;
-                if (config.SlogamOrder > config.SlogamCount)
-                    config.SlogamOrder = 1;
-                config.save();
-                delay(1000);
-            }
+              myDFPlayer.playMp3Folder(config.SlogamOrder);
+              config.SlogamOrder++;
+              if (config.SlogamOrder > config.SlogamCount)
+                  config.SlogamOrder = 1;
+              config.save();
+              delay(1000);
+            } 
             playSong = 9;
+            
         }
         break;
     case 9:

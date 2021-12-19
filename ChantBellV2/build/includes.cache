@@ -10,47 +10,47 @@
     "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\variants\\standard"
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\ChantBellV2.ino.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\ChantBell.ino.cpp",
     "Include": "Wire.h",
     "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\libraries\\Wire\\src"
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\ChantBellV2.ino.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\ChantBell.ino.cpp",
     "Include": "RTClib.h",
     "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib"
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\ChantBellV2.ino.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\ChantBell.ino.cpp",
     "Include": "SoftwareSerial.h",
     "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\libraries\\SoftwareSerial\\src"
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\ChantBellV2.ino.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\ChantBell.ino.cpp",
     "Include": "DFRobotDFPlayerMini.h",
     "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\DFRobotDFPlayerMini"
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\ChantBellV2.ino.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\ChantBell.ino.cpp",
     "Include": "LiquidCrystal_I2C.h",
     "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C"
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\ChantBellV2.ino.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\ChantBell.ino.cpp",
     "Include": "",
     "Includepath": null
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\Config.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\Config.cpp",
     "Include": "",
     "Includepath": null
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\LcdKeypad.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\LcdKeypad.cpp",
     "Include": "",
     "Includepath": null
   },
   {
-    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellV2\\build\\sketch\\MenuManager.cpp",
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell\\build\\sketch\\MenuManager.cpp",
     "Include": "",
     "Includepath": null
   },

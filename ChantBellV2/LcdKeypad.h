@@ -10,10 +10,10 @@
 #define LCD_COLS  16
 
 //Button Pins
-#define SELECT_BUT  6
-#define UP_BUT      7
-#define DOWN_BUT    8
-#define BACK_BUT    9
+#define SELECT_BUT  9
+#define UP_BUT      10
+#define DOWN_BUT    11
+#define BACK_BUT    12
 
 #define BUTTON_PIN  A0
 

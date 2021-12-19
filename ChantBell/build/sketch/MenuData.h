@@ -39,7 +39,8 @@ enum sampleMenuCommandId
   mnuCmdEveSong2Time,
   mnuCmdSongCount,
   mnuCmdMorSongNo,
-  mnuCmdEveSongNo    
+  mnuCmdEveSongNo,
+  mnuCmdReset    
 };
 
 PROGMEM const char sampleMenu_back[] = "BACK";
@@ -86,13 +87,15 @@ PROGMEM const char sampleMenu_2_4[] = "4 BACKLIGHT DUR";
 PROGMEM const char sampleMenu_2_5[] = "5 VOLUME";
 PROGMEM const char sampleMenu_2_6[] = "6 PLAY DEMO";
 PROGMEM const char sampleMenu_2_7[] = "7 SONG SETTING";
+PROGMEM const char sampleMenu_2_8[] = "8 RESET SETTING";
 PROGMEM const MenuItem sampleMenu_List_2[] = {{mnuCmdStartTime, sampleMenu_2_1}, 
                                               {mnuCmdEndTime, sampleMenu_2_2}, 
                                               {mnuCmdSlogamCount, sampleMenu_2_3}, 
                                               {mnuCmdBakLitDur, sampleMenu_2_4}, 
                                               {mnuCmdVolume, sampleMenu_2_5}, 
                                               {mnuCmdPlayDemo, sampleMenu_2_6, sampleMenu_List_2_6, menuCount(sampleMenu_List_2_6)}, 
-                                              {mnuCmdSongSetting, sampleMenu_2_7, sampleMenu_List_2_7, menuCount(sampleMenu_List_2_7)}, 
+                                              {mnuCmdSongSetting, sampleMenu_2_7, sampleMenu_List_2_7, menuCount(sampleMenu_List_2_7)},
+                                              {mnuCmdReset, sampleMenu_2_8}, 
                                               {mnuCmdBack, sampleMenu_back}};
 
 PROGMEM const char sampleMenu_1[] = "1 SET DATE TIME";

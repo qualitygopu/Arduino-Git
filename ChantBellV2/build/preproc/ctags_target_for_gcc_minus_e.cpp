@@ -1,18 +1,19 @@
-# 1 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-# 2 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 3 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 4 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 5 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 6 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 7 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 8 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 9 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 10 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 2
-# 21 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-long CurTime;
-byte Light1ON = 0, Light2ON = 0, PlayerONMor = 0, PlayerONEve = 0;
+# 1 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 2 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 3 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 4 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 5 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 6 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 7 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 8 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 9 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+# 10 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 2
+
+
+
+
 int ampDelay = 5000;
-unsigned long timrAmp, timrLCD, timr_Time, timrMNU, timrTrigger;
+unsigned long timrAmp, timrLCD, timr_Time, timrMNU;
 SoftwareSerial mySoftwareSerial(2, 3); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -20,10 +21,12 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 // RTC_DS3231 rtc;
 RTC_DS1307 rtc;
 
+//blink time 
+bool blink = true, serviceMode = false;
+
 MenuManager Menu1(sampleMenu_Root, (sizeof(sampleMenu_Root) / sizeof(MenuItem)));
 Config config;
 
-bool ButLongPress = false;
 byte alarmMode = 0;
 byte playSong = 1;
 byte btn;
@@ -38,7 +41,8 @@ enum AppModeValues
     APP_PROCESS_MENU_CMD,
     APP_CHANT_MODE,
     APP_DEMO_MODE,
-    APP_PLAYER_MODE
+    APP_SETHR_MODE,
+    APP_SETMIN_MODE
 };
 byte appMode = APP_NORMAL_MODE;
 
@@ -52,56 +56,58 @@ void setup()
 {
     //Serial.begin(9600);
     pinMode(A3, 0x1);
-    pinMode(13, 0x1);
-    pinMode(A0, 0x1);
-    pinMode(A1, 0x1);
-    pinMode(10, 0x1);
-    pinMode(11, 0x1);
-    pinMode(12, 0x1);
     pinMode(5, 0x2);
-    pinMode(6, 0x2);
-    pinMode(7, 0x2);
-    pinMode(8, 0x2);
     pinMode(9, 0x2);
+    pinMode(10, 0x2);
+    pinMode(11, 0x2);
+    pinMode(12, 0x2);
     Wire.begin();
     lcd.init();
     lcd.backlight();
     lcd.setCursor(5, 0);
     lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 79 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 67 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
              (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 79 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 67 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
              "WELCOME"
-# 79 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 67 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
              ); &__c[0];}))
-# 79 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 67 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
              )));
     lcd.setCursor(6, 1);
     lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 81 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
              (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 81 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
              "QTRON"
-# 81 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
              ); &__c[0];}))
-# 81 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
              )));
     delay(2000);
     lcd.clear();
-    lcd.setCursor(3, 0);
+    lcd.setCursor(3,0);
     lcd.print("Loading...");
     config.load();
+    if (!digitalRead(9)) {
+      lcd.setCursor(0, 1);
+      lcd.print("Service Mode");
+      serviceMode = true;
+    }
+    else {
+      serviceMode = false;
+    }
     while (!rtc.begin())
     {
         lcd.clear();
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 86 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 86 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  "ERR 01"
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 86 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  ); &__c[0];}))
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 86 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  ))); // Couldn't find RTC
     }
 
@@ -111,17 +117,18 @@ void setup()
     {
         lcd.clear();
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 98 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 94 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 98 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 94 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  "ERR 02"
-# 98 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 94 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  ); &__c[0];}))
-# 98 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 94 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  )));
         delay(2000);
     }
     // Initialize DF Player...............
+    if (digitalRead(12))
      {
          mySoftwareSerial.begin(9600);
          delay(500);
@@ -129,145 +136,53 @@ void setup()
          {
              lcd.setCursor(0, 0);
              lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 108 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 105 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                       (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 108 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 105 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                       "ERR 03"
-# 108 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 105 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                       ); &__c[0];}))
-# 108 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 105 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                       )));
          }
          myDFPlayer.setTimeOut(500);
          myDFPlayer.volume(config.vol);
          myDFPlayer.outputDevice(2);
      }
-    lcd.clear();
-    timrLCD = millis();
-    //   rtc.adjust(DateTime(2021,07,18,17,59,57));
+  lcd.clear();
+  timrLCD = millis();
+//   rtc.adjust(DateTime(2021,07,18,17,59,57));
 }
 void loop()
 {
     btn = getButton();
     if (btn)
-    {
-        timrLCD = millis();
-        timrMNU = millis();
-        lcd.backlight();
-    }
-    if (btn == (2 | (2 << 6)))
-    {
-        if (!ButLongPress)
         {
-            if (config.AutoPlay == 0)
-            {
-                config.AutoPlay = 1;
-                lcd.setCursor(0, 1);
-                lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 135 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 135 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         "  AUTO PLAY ON  "
-# 135 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         ); &__c[0];}))
-# 135 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         )));
-            }
-            else
-            {
-                config.AutoPlay = 0;
-                lcd.setCursor(0, 1);
-                lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 141 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 141 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         " AUTO PLAY OFF  "
-# 141 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         ); &__c[0];}))
-# 141 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         )));
-            }
-            digitalWrite(A1, config.AutoPlay);
-            delay(1000);
-            lcd.clear();
-            config.save();
-            ButLongPress = true;
+          timrLCD = millis();
+          timrMNU = millis();
+          lcd.backlight();
         }
-    }
-    if (btn == (3 | (2 << 6)))
-    {
-        if (!ButLongPress)
-        {
-            if (config.AutoLight == 0)
-            {
-                config.AutoLight = 1;
-                lcd.setCursor(0, 1);
-                lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 158 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 158 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         " AUTO LIGHT ON  "
-# 158 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         ); &__c[0];}))
-# 158 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         )));
-            }
-            else
-            {
-                config.AutoLight = 0;
-                lcd.setCursor(0, 1);
-                lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 164 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 164 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         " AUTO LIGHT OFF "
-# 164 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                         ); &__c[0];}))
-# 164 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                         )));
-            }
-            digitalWrite(A0, config.AutoLight);
-            delay(1000);
-            lcd.clear();
-            config.save();
-            ButLongPress = true;
-        }
-    }
-    if (btn == (3 | (3 << 6)) || btn == (2 | (3 << 6)) || btn == (4 | (3 << 6)))
-    {
-        ButLongPress = false;
-    }
-
-    if (millis() - timrTrigger > 1000)
-    {
-        timrTrigger = millis();
-        if (config.AutoLight)
-            TriggerLights();
-    }
-    digitalWrite(A0, config.AutoLight);
-    digitalWrite(A1, config.AutoPlay);
-    // if (config.AutoLight == 1)
-    //     digitalWrite(AUTOLIGHT, config.AutoLight);
-    // else
-    //     digitalWrite(AUTOLIGHT, LOW);
-
-    // if (config.AutoPlay == 1)
-    //     digitalWrite(AUTOPLAY, HIGH);
-    // else
-    //     digitalWrite(AUTOPLAY, LOW);
-
     switch (appMode)
     {
     case APP_NORMAL_MODE:
-        digitalWrite(A3, 0x0);
-        digitalWrite(13, 0x0);
-        if (btn == (1 | (2 << 6)) /*128*/)
+        if (btn == (1 | (2 << 6)) /*128*/ && serviceMode)
         {
             appMode = APP_MENU_MODE;
             refreshMenuDisplay(REFRESH_DESCEND);
             timrMNU = millis();
         }
-
+        else if (btn == (2 | (2 << 6)))
+        {
+            appMode = APP_SETHR_MODE;
+            timrMNU = millis();
+            // lcd.clear();
+        }
+        else if (btn == (3 | (2 << 6)))
+        {
+            appMode = APP_SETMIN_MODE;
+            timrMNU = millis();
+            // lcd.clear();
+        }
         if (rtc.now().minute() == 0 && rtc.now().second() == 0 && millis() > timrAmp + 61000L)
         {
             int hr = rtc.now().hour();
@@ -283,28 +198,103 @@ void loop()
         {
             timr_Time = millis();
             showTime();
-            CurTime = (rtc.now().hour() * 60) + rtc.now().minute();
-            if (config.AutoPlay)
-                TriggerPlayer();
         }
         if (millis() - timrLCD > (config.backLightDur * 1000L))
         {
             lcd.noBacklight();
         }
-        if (btn == (4 | (2 << 6)))
+        break;
+    case APP_SETHR_MODE:
+    {
+        if (millis() - timr_Time > 300)
         {
-            if (!ButLongPress)
+            if (blink)
             {
-                appMode = APP_PLAYER_MODE;
-                lcd.clear();
-                ButLongPress = true;
+                showTime();
+                blink = false;
             }
+            else
+            {
+                lcd.setCursor(2,0);
+                lcd.print("  ");
+                blink = true;
+            }
+            timr_Time = millis();
+        }
+
+        if (btn == (2 | (0 << 6)))
+        {
+            rtc.adjust(DateTime(rtc.now().year(),
+                                rtc.now().month(),
+                                rtc.now().day(),
+                                rtc.now().hour()+1,
+                                rtc.now().minute(),
+                                rtc.now().second()));
+        }
+        if (btn == (3 | (0 << 6)))
+        {
+            rtc.adjust(DateTime(rtc.now().year(),
+                                rtc.now().month(),
+                                rtc.now().day(),
+                                rtc.now().hour()-1,
+                                rtc.now().minute(),
+                                rtc.now().second()));
+        }
+        if (btn == (1 | (0 << 6)) /*1*/ || millis() - timrMNU > 10000)
+        {
+            appMode = APP_NORMAL_MODE;
+            lcd.clear();
         }
         break;
+    }
+    case APP_SETMIN_MODE:
+    {
+if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            {
+                showTime();
+                blink = false;
+            }
+            else
+            {
+                lcd.setCursor(5,0);
+                lcd.print("  ");
+                blink = true;
+            }
+            timr_Time = millis();
+        }
+
+        if (btn == (2 | (0 << 6)))
+        {
+            rtc.adjust(DateTime(rtc.now().year(),
+                                rtc.now().month(),
+                                rtc.now().day(),
+                                rtc.now().hour(),
+                                rtc.now().minute()+1,
+                                rtc.now().second()));
+        }
+        if (btn == (3 | (0 << 6)))
+        {
+            rtc.adjust(DateTime(rtc.now().year(),
+                                rtc.now().month(),
+                                rtc.now().day(),
+                                rtc.now().hour(),
+                                rtc.now().minute()-1,
+                                rtc.now().second()));
+        }
+        if (btn == (1 | (0 << 6)) /*1*/ || millis() - timrMNU > 10000)
+        {
+            appMode = APP_NORMAL_MODE;
+            lcd.clear();
+        }
+        break;
+    }
+
     case APP_CHANT_MODE:
     {
         lcd.backlight();
-        lcd.setCursor(0, 1);
+        lcd.setCursor(0,1);
         lcd.print("CHANT PLAYING...");
         if (millis() >= timrAmp + ampDelay)
             PlayChant(rtc.now().hour());
@@ -314,9 +304,9 @@ void loop()
     {
         if (millis() - timrMNU > 10000)
         {
-            Menu1.reset();
-            appMode = APP_NORMAL_MODE;
-            lcd.clear();
+          Menu1.reset();
+          appMode = APP_NORMAL_MODE;
+          lcd.clear();
         }
 
         if (Menu1.getCurrentItemCmdId() == 1)
@@ -358,9 +348,9 @@ void loop()
         byte processingComplete = processMenuCommand(Menu1.getCurrentItemCmdId());
         if (millis() - timrMNU > 10000)
         {
-            Menu1.reset();
-            appMode = APP_NORMAL_MODE;
-            lcd.clear();
+          Menu1.reset();
+          appMode = APP_NORMAL_MODE;
+          lcd.clear();
         }
         if (processingComplete)
         {
@@ -377,193 +367,30 @@ void loop()
     {
         lcd.setCursor(0, 0);
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 316 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 328 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 316 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 328 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  "  RUNNING DEMO  "
-# 316 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
+# 328 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  ); &__c[0];}))
-# 316 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
+# 328 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  )));
         lcd.setCursor(0, 1);
-        lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime - 12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
+        lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime-12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
         digitalWrite(A3, 0x1);
         delay(1000);
         PlayChant(demoTime);
         if (btn == (3 | (0 << 6)))
         {
-            playSong = 9;
-            myDFPlayer.stop();
+          playSong = 9;
+          myDFPlayer.stop();
         }
-        break;
-    }
-    case APP_PLAYER_MODE:
-    {
-        digitalWrite(A3, 0x1);
-        digitalWrite(13, 0x1);
-        if (millis() - timr_Time > 1000)
-        {
-            timr_Time = millis();
-            showTime();
-            CurTime = (rtc.now().hour() * 60) + rtc.now().minute();
-            if (config.AutoPlay)
-                TriggerPlayer();
-        }
-        if (millis() - timrLCD > (config.backLightDur * 1000L))
-        {
-            lcd.noBacklight();
-        }
-        lcd.setCursor(0, 1);
-        lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 346 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                 (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 346 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                 " PLAYER MODE ON "
-# 346 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino" 3
-                 ); &__c[0];}))
-# 346 "e:\\Arduino\\Arduino Git\\ChantBellV2\\ChantBellV2.ino"
-                 )));
-        if (btn == (4 | (2 << 6)))
-        {
-            if (!ButLongPress)
-            {
-                appMode = APP_NORMAL_MODE;
-                lcd.clear();
-                ButLongPress = true;
-            }
-        }
-        break;
+    break;
     }
     }
 }
 
-void TriggerLights()
-{
-    // Validate Light 1
-    {
-        if (config.Light1Off > config.Light1On)
-        {
-            if (CurTime >= config.Light1On && CurTime < config.Light1Off)
-            {
-                if (Light1ON == 0)
-                {
-                    Serial.println("Light ON");
-                    digitalWrite(10, 0x1);
-                    Light1ON = 1;
-                }
-            }
-            else
-            {
-                if (Light1ON == 1)
-                {
-                    Serial.println("Light OFF");
-                    digitalWrite(10, 0x0);
-                    Light1ON = 0;
-                }
-            }
-        }
-        else
-        {
-            if (CurTime < config.Light1On && CurTime >= config.Light1Off)
-            {
-                if (Light1ON == 1)
-                {
-                    Serial.println("Light OFF");
-                    digitalWrite(10, 0x0);
-                    Light1ON = 0;
-                }
-            }
-            else
-            {
-                if (Light1ON == 0)
-                {
-                    Serial.println("Light ON");
-                    digitalWrite(10, 0x1);
-                    Light1ON = 1;
-                }
-            }
-        }
-    }
-    // Validate Light 2
-    {
-        if (config.Light2Off > config.Light2On)
-        {
-            if (CurTime >= config.Light2On && CurTime < config.Light2Off)
-            {
-                if (Light2ON == 0)
-                {
-                    digitalWrite(11, 0x1);
-                    Light2ON = 1;
-                }
-            }
-            else
-            {
-                if (Light2ON == 1)
-                {
-                    digitalWrite(11, 0x0);
-                    Light2ON = 0;
-                }
-            }
-        }
-        else
-        {
-            if (CurTime < config.Light2On && CurTime >= config.Light2Off)
-            {
-                if (Light2ON == 1)
-                {
-                    digitalWrite(11, 0x0);
-                    Light2ON = 0;
-                }
-            }
-            else
-            {
-                if (Light2ON == 0)
-                {
-                    digitalWrite(11, 0x1);
-                    Light2ON = 1;
-                }
-            }
-        }
-    }
-}
-void TriggerPlayer()
-{
-    // Validate Player Morning
-    if (CurTime >= config.PlayerMorTime && CurTime < config.PlayerMorTime + config.PlayerMorDur)
-    {
-        if (PlayerONMor == 0)
-        {
-            PlayerONMor = 1;
-            appMode = APP_PLAYER_MODE;
-            lcd.clear();
-        }
-    }
-    // Validate Player Evening
-    else if (CurTime >= config.PlayerEveTime && CurTime < config.PlayerEveTime + config.PlayerEveDur)
-    {
-        if (PlayerONEve == 0)
-        {
-            PlayerONEve = 1;
-            appMode = APP_PLAYER_MODE;
-            lcd.clear();
-        }
-    }
-    else
-    {
-        if (appMode == APP_PLAYER_MODE)
-        {
-          if (PlayerONEve == 1 || PlayerONMor == 1)
-          {
-            digitalWrite(A3, 0x0);
-            digitalWrite(13, 0x0);
-            PlayerONMor = 0;
-            PlayerONEve = 0;
-            lcd.clear();
-            appMode = APP_NORMAL_MODE;
-          }
-        }
-    }
-}
+
 
 void showTime()
 {
@@ -983,313 +810,19 @@ byte processMenuCommand(byte cmdId)
         }
         break;
     }
-    case mnuCmdLt1OnHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1On = addToTime(60, config.Light1On);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1On = addToTime(-60, config.Light1On);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OnMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1On = addToTime(1, config.Light1On);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1On = addToTime(-1, config.Light1On);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(60, config.Light1Off);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(-60, config.Light1Off);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(1, config.Light1Off);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(-1, config.Light1Off);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OnHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light2On = addToTime(60, config.Light2On);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light2On = addToTime(-60, config.Light2On);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OnMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light2On = addToTime(1, config.Light2On);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light2On = addToTime(-1, config.Light2On);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OffHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light2Off = addToTime(60, config.Light2Off);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light2Off = addToTime(-60, config.Light2Off);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt2OffMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light2Off = addToTime(1, config.Light2Off);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light2Off = addToTime(-1, config.Light2Off);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrMorHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.PlayerMorTime = addToTime(60, config.PlayerMorTime);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.PlayerMorTime = addToTime(-60, config.PlayerMorTime);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrMorMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.PlayerMorTime = addToTime(1, config.PlayerMorTime);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.PlayerMorTime = addToTime(-1, config.PlayerMorTime);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrMorDur:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.PlayerMorDur = addToTime(5, config.PlayerMorDur);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.PlayerMorDur = addToTime(-5, config.PlayerMorDur);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.PlayerEveTime = addToTime(60, config.PlayerEveTime);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.PlayerEveTime = addToTime(-60, config.PlayerEveTime);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.PlayerEveTime = addToTime(1, config.PlayerEveTime);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.PlayerEveTime = addToTime(-1, config.PlayerEveTime);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveDur:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.PlayerEveDur = addToTime(5, config.PlayerEveDur);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.PlayerEveDur = addToTime(-5, config.PlayerEveDur);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
     case mnuCmdReset:
     {
-        if (btn == (1 | (2 << 6)) /*128*/)
-        {
-            config.setDefaults();
-            lcd.setCursor(1, 1);
-            lcd.print("Defaults loaded");
-        }
-        else if (btn == (1 | (3 << 6)) /*193*/)
-        {
-            complete = true;
-        }
-        break;
+      if (btn == (1 | (2 << 6)) /*128*/)
+      {
+        config.setDefaults();
+        lcd.setCursor(1, 1);
+        lcd.print("Defaults loaded");
+      }
+      else if (btn == (1 | (3 << 6)) /*193*/)
+      {
+        complete = true;
+      }
+      break;
     }
     }
     if (configChanged)
@@ -1311,8 +844,8 @@ byte getNavAction()
         navAction = MENU_ITEM_NEXT;
     else if (btn == (1 | (0 << 6)) /*1*/)
         navAction = MENU_ITEM_SELECT;
-    else if (btn == (4 | (1 << 6)))
-        navAction = MENU_BACK;
+    // else if (btn == BUTTON_LEFT_PRESSED)
+    //     navAction = MENU_BACK;
     return navAction;
 }
 
@@ -1321,35 +854,21 @@ const char EmptyStr[] = "";
 void refreshMenuDisplay(byte refreshMode)
 {
     char nameBuf[16 + 1];
-    byte cmdId;
-    cmdId = Menu1.getCurrentItemCmdId();
+
     lcd.setCursor(0, 0);
     if (Menu1.currentItemHasChildren())
     {
         rpad(strbuf, Menu1.getCurrentItemName(nameBuf));
         strbuf[16 - 1] = 0b01111110; // Display forward arrow if this menu item has children.
         lcd.print(strbuf);
-        if (cmdId == mnuCmdLt1OnTime ||
-            cmdId == mnuCmdLt1OffTime ||
-            cmdId == mnuCmdLt2OnTime ||
-            cmdId == mnuCmdLt2OffTime ||
-            cmdId == mnuCmdPlrMorOnTime ||
-            cmdId == mnuCmdPlrEveOnTime)
-        {
-            lcd.setCursor(0, 1);
-            lcd.print(" ");
-            lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
-        }
-        else
-        {
-            lcd.setCursor(0, 1);
-            lcd.print(rpad(strbuf, EmptyStr)); // Clear config value in display
-        }
-
+        lcd.setCursor(0, 1);
+        lcd.print(rpad(strbuf, EmptyStr)); // Clear config value in display
     }
     else
     {
+        byte cmdId;
         rpad(strbuf, Menu1.getCurrentItemName(nameBuf));
+
         if ((cmdId = Menu1.getCurrentItemCmdId()) == 0)
         {
             strbuf[16 - 1] = 0b01111111; // Display back arrow if this menu item ascends to parent.
@@ -1376,12 +895,12 @@ void PlayChant(short hr)
     case 1:
         if (digitalRead(5))
         {
-            myDFPlayer.playMp3Folder(0);
+          myDFPlayer.playMp3Folder(0);
             delay(1000);
             playSong = 2;
         }
         break;
-        //  if (digitalRead(STA_PIN))
+        // if (digitalRead(STA_PIN))
         // {
         //     myDFPlayer.playFolder(3, n);
         //     n = ++n > 3 ? 1 : n;
@@ -1394,7 +913,7 @@ void PlayChant(short hr)
         {
             myDFPlayer.playFolder(1, hr);
             delay(1000);
-            playSong = 3;
+             playSong = 3;
         }
         break;
     case 3:
@@ -1430,14 +949,15 @@ void PlayChant(short hr)
             }
             else
             {
-                myDFPlayer.playMp3Folder(config.SlogamOrder);
-                config.SlogamOrder++;
-                if (config.SlogamOrder > config.SlogamCount)
-                    config.SlogamOrder = 1;
-                config.save();
-                delay(1000);
+              myDFPlayer.playMp3Folder(config.SlogamOrder);
+              config.SlogamOrder++;
+              if (config.SlogamOrder > config.SlogamCount)
+                  config.SlogamOrder = 1;
+              config.save();
+              delay(1000);
             }
             playSong = 9;
+
         }
         break;
     case 9:

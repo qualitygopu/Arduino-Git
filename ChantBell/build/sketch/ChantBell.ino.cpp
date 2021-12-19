@@ -22,6 +22,10 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 // RTC_DS3231 rtc;
 RTC_DS1307 rtc;
 
+short selButPreCount = 0;
+
+//blink time 
+bool blink = true, serviceMode = false;
 
 MenuManager Menu1(sampleMenu_Root, menuCount(sampleMenu_Root));
 Config config;
@@ -39,7 +43,9 @@ enum AppModeValues
     APP_MENU_MODE,
     APP_PROCESS_MENU_CMD,
     APP_CHANT_MODE,
-    APP_DEMO_MODE
+    APP_DEMO_MODE,
+    APP_SETHR_MODE,
+    APP_SETMIN_MODE
 };
 byte appMode = APP_NORMAL_MODE;
 
@@ -49,11 +55,11 @@ void PlayChant(short hr);
 byte processMenuCommand(byte cmdId);
 void showTime();
 
-#line 50 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+#line 56 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
 void setup();
-#line 102 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+#line 118 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
 void loop();
-#line 50 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+#line 56 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
 void setup()
 {
     //Serial.begin(9600);
@@ -75,6 +81,14 @@ void setup()
     lcd.setCursor(3,0);
     lcd.print("Loading...");
     config.load();
+    if (!digitalRead(SELECT_BUT)) {
+      lcd.setCursor(0, 1);
+      lcd.print("Service Mode");  
+      serviceMode = true;    
+    }
+    else {
+      serviceMode = false;
+    }
     while (!rtc.begin())
     {
         lcd.clear();
@@ -88,19 +102,21 @@ void setup()
         lcd.clear();
         lcd.print(F("ERR 02"));
         delay(2000);
+        serviceMode = true;
     }
     // Initialize DF Player...............
+    if (digitalRead(BACK_BUT))
      {
-        //  mySoftwareSerial.begin(9600);
-        //  delay(500);
-        //  while (!myDFPlayer.begin(mySoftwareSerial))
-        //  {
-        //      lcd.setCursor(0, 0);
-        //      lcd.print(F("ERR 03"));
-        //  }
-        //  myDFPlayer.setTimeOut(500);
-        //  myDFPlayer.volume(config.vol);
-        //  myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
+         mySoftwareSerial.begin(9600);
+         delay(500);
+         while (!myDFPlayer.begin(mySoftwareSerial))
+         {
+             lcd.setCursor(0, 0);
+             lcd.print(F("ERR 03"));
+         }
+         myDFPlayer.setTimeOut(500);
+         myDFPlayer.volume(config.vol);
+         myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
      }
   lcd.clear();    
   timrLCD = millis();  
@@ -108,6 +124,12 @@ void setup()
 }
 void loop()
 {
+  if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
+  {
+    delay(10000);
+    rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),2));        
+  }  
+  
     btn = getButton();
     if (btn)
         {
@@ -118,13 +140,38 @@ void loop()
     switch (appMode)
     {
     case APP_NORMAL_MODE:
-        if (btn == BUTTON_SELECT_LONG_PRESSED)
+        if (btn == BUTTON_SELECT_LONG_PRESSED && serviceMode)
         {
             appMode = APP_MENU_MODE;
             refreshMenuDisplay(REFRESH_DESCEND);
             timrMNU = millis();
         }
-        if (rtc.now().minute() == 0 && rtc.now().second() == 0)
+        else if (btn == BUTTON_UP_LONG_PRESSED)
+        {
+            appMode = APP_SETHR_MODE;
+            timrMNU = millis();
+            // lcd.clear();
+        }
+        else if (btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            appMode = APP_SETMIN_MODE;
+            timrMNU = millis();
+            // lcd.clear();
+        }
+        if (btn == BUTTON_SELECT_PRESSED) {
+          selButPreCount +=1;
+          if (selButPreCount >= 4) 
+          {
+            demoTime = random(6,18);
+            appMode = APP_DEMO_MODE;
+            lcd.clear();
+          }          
+        }
+        if (millis() - timrLCD > 500) 
+        {
+          selButPreCount = 0;
+        }
+        if (rtc.now().minute() == 0 && rtc.now().second() == 0 && millis() > timrAmp + 61000L)
         {
             int hr = rtc.now().hour();
             if (hr >= config.startTime && hr <= config.endTime) // chek time
@@ -145,6 +192,93 @@ void loop()
             lcd.noBacklight();
         }
         break;
+    case APP_SETHR_MODE:
+    {
+        if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            { 
+                showTime();
+                blink = false;
+            }
+            else
+            {
+                lcd.setCursor(2,0);
+                lcd.print("  ");
+                blink = true;
+            }     
+            timr_Time = millis();       
+        }
+
+        if (btn == BUTTON_UP_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour() > 23 ? 0 : rtc.now().hour() + 1,
+                                rtc.now().minute(),
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_DOWN_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour() < 0 ? 23 : rtc.now().hour() - 1,
+                                rtc.now().minute(),
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_SELECT_PRESSED || millis() - timrMNU > 10000)
+        {
+            appMode = APP_NORMAL_MODE;
+            lcd.clear();
+        }   
+        break;
+    }
+    case APP_SETMIN_MODE:
+    {
+      if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            { 
+                showTime();
+                blink = false;
+            }
+            else
+            {
+                lcd.setCursor(5,0);
+                lcd.print("  ");
+                blink = true;
+            }     
+            timr_Time = millis();       
+        }
+
+        if (btn == BUTTON_UP_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour(),
+                                rtc.now().minute() > 59 ? 0 : rtc.now().minute()+1,
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_DOWN_PRESSED)   
+        {
+            rtc.adjust(DateTime(rtc.now().year(), 
+                                rtc.now().month(), 
+                                rtc.now().day(), 
+                                rtc.now().hour(),
+                                rtc.now().minute() < 0 ? 59 : rtc.now().minute()-1,
+                                rtc.now().second()));
+        }
+        if (btn == BUTTON_SELECT_PRESSED || millis() - timrMNU > 10000)
+        {
+            appMode = APP_NORMAL_MODE;
+            lcd.clear();
+        }   
+        break;
+    }
+    
     case APP_CHANT_MODE:
     {
         lcd.backlight();
@@ -656,6 +790,20 @@ byte processMenuCommand(byte cmdId)
         }
         break;
     }
+    case mnuCmdReset:
+    {
+      if (btn == BUTTON_SELECT_LONG_PRESSED)
+      {
+        config.setDefaults();
+        lcd.setCursor(1, 1);
+        lcd.print("Defaults loaded");
+      }
+      else if (btn == BUTTON_SELECT_LONG_RELEASE)
+      {
+        complete = true;
+      }
+      break;
+    }
     }
     if (configChanged)
     {
@@ -718,26 +866,36 @@ void refreshMenuDisplay(byte refreshMode)
     }
 }
 
-
+int n = 1;
 void PlayChant(short hr)
 {
     // Serial.println(String(hr));
+        
+
     switch (playSong)
     {
     case 1:
         if (digitalRead(STA_PIN))
-        {
-            myDFPlayer.playMp3Folder(0);
+        { 
+          myDFPlayer.playMp3Folder(0);
             delay(1000);
             playSong = 2;
         }
         break;
+        // if (digitalRead(STA_PIN))
+        // {
+        //     myDFPlayer.playFolder(3, n);
+        //     n = ++n > 3 ? 1 : n;
+        //     delay(1000);
+        //     playSong = 2;
+        // }
+        // break;
     case 2:
         if (digitalRead(STA_PIN))
         {
             myDFPlayer.playFolder(1, hr);
             delay(1000);
-            playSong = 3;
+             playSong = 3;
         }
         break;
     case 3:
@@ -781,6 +939,7 @@ void PlayChant(short hr)
               delay(1000);
             } 
             playSong = 9;
+            
         }
         break;
     case 9:

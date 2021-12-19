@@ -140,12 +140,12 @@ void Config::setDefaults()
   SlogamOrder = 1;
   SongCount = 10;
   SongOrder = 1;
-  MorSong1Time = 3;
+  MorSong1Time = 6; //default 3
   MorSong2Time = 3;
   EveSong2Time = 3;
-  EveSong1Time = 3;
-  MorSongNo = 1;
-  EveSongNo = 2;
+  EveSong1Time = 6; //default 3
+  MorSongNo = 3; //default 1
+  EveSongNo = 6; //default 2
 }
 
 void Config::save()
