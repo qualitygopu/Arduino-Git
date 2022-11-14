@@ -39,12 +39,24 @@ Config config;
 
 bool ButLongPress = false;
 byte alarmMode = 0;
-byte playSong = 1;
 byte btn;
 char strbuf[LCD_COLS + 1];
 
 String months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+enum PlaySong
+{
+    Starting_Song,
+    Time,
+    English_Month,
+    English_Date,
+    Day_of_Week,
+    Tamil_Date,
+    Song_1,
+    Song_2,
+    End_of_Song
+};
+byte playSong = Starting_Song;
 
 enum AppModeValues
 {
@@ -78,23 +90,24 @@ void showTime();
 template <typename T, size_t N>
 size_t ArraySize(T (&)[N]) { return N; }
 
-#line 79 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
+#line 91 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
 void setup();
-#line 163 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
+#line 176 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
 void loop();
-#line 575 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
+#line 588 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
 void TriggerLights();
-#line 621 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
+#line 634 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
 void TriggerPlayer();
-#line 1464 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
-void startPreSong(byte fol, byte song);
-#line 1470 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
-void stopPreSong();
 #line 1477 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
+void startPreSong(byte fol, byte song);
+#line 1483 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
+void stopPreSong();
+#line 1490 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
 void PlayChant();
-#line 79 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
+#line 91 "e:\\Arduino\\Arduino Git\\ChantBellV3.1_Demo\\ChantBellV3.1_Demo.ino"
 void setup()
 {
+    randomSeed(analogRead(A0));
     char intstr[5];
     // Serial.begin(9600);
     pinMode(AMP, OUTPUT);
@@ -550,7 +563,7 @@ void loop()
         PlayChant();
         if (btn == BUTTON_DOWN_PRESSED)
         {
-            playSong = 9;
+            playSong = End_of_Song;
             myDFPlayer.stop();
         }
         break;
@@ -831,11 +844,11 @@ byte processMenuCommand(byte cmdId)
         configChanged = true;
         if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
         {
-            config.SlogamCount = ++config.SlogamCount;
+            config.Song1_Count = ++config.Song1_Count;
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            config.SlogamCount = --config.SlogamCount < 0 ? 100 : config.SlogamCount;
+            config.Song1_Count = --config.Song1_Count < 0 ? 100 : config.Song1_Count;
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
@@ -1493,49 +1506,50 @@ void stopPreSong()
 int n = 1;
 void PlayChant()
 {
+    // Serial.println(String(hr));
     switch (playSong)
     {
-    case 1: // Temple Name
+    case Starting_Song: // Temple Name
         if (digitalRead(STA_PIN))
         {
             myDFPlayer.playMp3Folder(0);
             delay(1000);
-            playSong = 2;
+            playSong = Time;
         }
         break;
-    case 2:
+    case Time:
         if (digitalRead(STA_PIN)) // Time
         {
             myDFPlayer.playFolder(1, bell.hour());
             delay(1000);
-            playSong = 3;
+            playSong = English_Month;
         }
         break;
-    case 3: // English Month
+    case English_Month: // English Month
         if (digitalRead(STA_PIN))
         {
             myDFPlayer.playFolder(47, bell.month());
             delay(1000);
-            playSong = 4;
+            playSong = English_Date;
         }
         break;
-    case 4: // Englidh Date
+    case English_Date: // Englidh Date
         if (digitalRead(STA_PIN))
         {
             myDFPlayer.playFolder(48, bell.day());
             delay(1000);
-            playSong = 5;
+            playSong = Day_of_Week;
         }
         break;
-    case 5: // Day of Week
+    case Day_of_Week: // Day of Week
         if (digitalRead(STA_PIN))
         {
             myDFPlayer.playFolder(49, bell.dayOfTheWeek() + 1);
             delay(1000);
-            playSong = 6;
+            playSong = Tamil_Date;
         }
         break;
-    case 6: // Tamil Date
+    case Tamil_Date: // Tamil Date
         if (digitalRead(STA_PIN))
         {
             if (bell.hour() == 6 || bell.hour() == 8 || bell.hour() == 10)
@@ -1550,61 +1564,50 @@ void PlayChant()
                     myDFPlayer.playFolder(50, bell.day());
                     delay(1000);
                 }
-                playSong = 8;
+                playSong = Song_1;
             }
             else
             {
-                playSong = 8;
+                playSong = Song_1;
             }
         }
         break;
-    case 8:
+
+    case Song_1:
         if (digitalRead(STA_PIN))
         {
             if (config.MorSong1Time == bell.hour() && config.MorSong1Time != 3)
             {
                 myDFPlayer.playFolder(2, config.MorSongNo);
                 delay(1000);
-            }
-            else if (config.MorSong2Time == bell.hour() && config.MorSong2Time != 3)
-            {
-                myDFPlayer.playFolder(4, config.SongOrder);
-                config.SongOrder++;
-                if (config.SongOrder > config.SongCount)
-                    config.SongOrder = 1;
-                config.save();
-                delay(1000);
+                playSong = End_of_Song;
             }
             else if ((config.EveSong1Time + 12) == bell.hour() && (config.EveSong1Time != 3))
             {
                 myDFPlayer.playFolder(2, config.EveSongNo);
                 delay(1000);
-            }
-            else if ((config.EveSong2Time + 12) == bell.hour() && (config.EveSong2Time != 3))
-            {
-                myDFPlayer.playFolder(4, config.SongOrder);
-                config.SongOrder++;
-                if (config.SongOrder > config.SongCount)
-                    config.SongOrder = 1;
-                config.save();
-                delay(1000);
+                playSong = End_of_Song;
             }
             else
             {
-                myDFPlayer.playMp3Folder(config.SlogamOrder);
-                config.SlogamOrder++;
-                if (config.SlogamOrder > config.SlogamCount)
-                    config.SlogamOrder = 1;
-                config.save();
+                myDFPlayer.playMp3Folder(random(1,config.Song1_Count));
                 delay(1000);
+                playSong = End_of_Song;
             }
-            playSong = 9;
         }
         break;
-    case 9:
+    case Song_2:
+        // if (digitalRead(STA_PIN))
+        // {
+        //     myDFPlayer.playFolder(6,random(1,config.Song2_Count));
+        //     delay(1000);
+            playSong = End_of_Song;
+        // }
+        break;
+    case End_of_Song:
         if (digitalRead(STA_PIN))
         {
-            playSong = 1;
+            playSong = Starting_Song;
             lcd.clear();
             appMode = APP_NORMAL_MODE;
             timrLCD = millis();
@@ -1612,5 +1615,4 @@ void PlayChant()
         }
         break;
     }
-    // Serial.println(String(hr));
 }

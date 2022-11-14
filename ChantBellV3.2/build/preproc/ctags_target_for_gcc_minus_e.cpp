@@ -122,10 +122,10 @@ void setup()
              )));
     delay(2000);
     lcd.clear();
-    lcd.setCursor(0,0);
+    lcd.setCursor(0, 0);
     inttostr(intstr, config.DataYear);
     lcd.print(fmt(strbuf, 2, "Ver : 3.2/", intstr));
-    lcd.setCursor(0,1);
+    lcd.setCursor(0, 1);
     inttostr(intstr, config.SerialNo);
     lcd.print(fmt(strbuf, 2, "Serial No : 0", intstr));
     delay(2000);
@@ -172,7 +172,6 @@ void setup()
         serviceMode = true;
     }
 
-
     // Initialize DF Player...............
     if (digitalRead(8))
     {
@@ -183,13 +182,13 @@ void setup()
             lcd.clear();
             lcd.setCursor(0, 0);
             lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 159 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                      (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 159 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                      "ERR 03"
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 159 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                      ); &__c[0];}))
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 159 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                      )));
         }
         myDFPlayer.setTimeOut(500);
@@ -215,7 +214,6 @@ void setup()
         testMode = true;
     else
         testMode = false;
-
 }
 
 void loop()
@@ -236,13 +234,13 @@ void loop()
                 config.AutoPlay = 1;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 205 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 203 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 205 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 203 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          "  AUTO PLAY ON  "
-# 205 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 203 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          ); &__c[0];}))
-# 205 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 203 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          )));
             }
             else
@@ -250,13 +248,13 @@ void loop()
                 config.AutoPlay = 0;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 211 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 209 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 211 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 209 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          " AUTO PLAY OFF  "
-# 211 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 209 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          ); &__c[0];}))
-# 211 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 209 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          )));
             }
             digitalWrite(A0, config.AutoPlay);
@@ -275,13 +273,13 @@ void loop()
                 config.AutoLight = 1;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 228 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 226 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 228 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 226 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          " AUTO LIGHT ON  "
-# 228 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 226 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          ); &__c[0];}))
-# 228 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 226 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          )));
             }
             else
@@ -289,13 +287,13 @@ void loop()
                 config.AutoLight = 0;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 234 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 232 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 234 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 232 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          " AUTO LIGHT OFF "
-# 234 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 232 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                          ); &__c[0];}))
-# 234 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 232 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                          )));
             }
             digitalWrite(A1, config.AutoLight);
@@ -368,7 +366,7 @@ void loop()
                      bell.hour() == 16))
                 {
                     lcd.clear();
-                    lcd.setCursor(0,0);
+                    lcd.setCursor(0, 0);
                     lcd.print("School Zone : ON");
                     delay(1000);
                     lcd.clear();
@@ -382,7 +380,7 @@ void loop()
                 }
             }
         }
-        // TEST MODE //   
+        // TEST MODE //
         {
             if (btn == (2 | (0 << 6)) && testMode)
             {
@@ -432,13 +430,13 @@ void loop()
     {
         lcd.setCursor(0, 0);
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 369 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 367 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 369 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 367 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                  "  RUNNING DEMO  "
-# 369 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 367 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                  ); &__c[0];}))
-# 369 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 367 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                  )));
         lcd.setCursor(0, 1);
         lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime - 12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
@@ -446,7 +444,7 @@ void loop()
         // delay(1000);
         bell = DateTime(rtc.now().year(), rtc.now().month(), rtc.now().day(), demoTime, 0, 0);
         PlayChant();
-        if (btn == (3 | (0 << 6)))
+        if (btn == (4 | (0 << 6)))
         {
             playSong = End_of_Song;
             myDFPlayer.stop();
@@ -586,13 +584,13 @@ void loop()
         }
         lcd.setCursor(0, 1);
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 515 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 513 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 515 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 513 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                  " PLAYER MODE ON "
-# 515 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 513 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                  ); &__c[0];}))
-# 515 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 513 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                  )));
         if (btn == (5 | (2 << 6)))
         {
@@ -1319,13 +1317,13 @@ byte processMenuCommand(byte cmdId)
                     if (blinkMode == setMin)
                         lcd.setCursor(4, 1);
                     lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 1240 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 1238 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                              (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 1240 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 1238 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                              "  "
-# 1240 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 1238 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                              ); &__c[0];}))
-# 1240 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 1238 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                              )));
                     blink = true;
                 }
@@ -1338,13 +1336,13 @@ byte processMenuCommand(byte cmdId)
                     if (blinkMode == setYear)
                         lcd.setCursor(9, 1);
                     lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 1251 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 1249 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                              (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 1251 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 1249 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                              "  "
-# 1251 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
+# 1249 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino" 3
                              ); &__c[0];}))
-# 1251 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+# 1249 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
                              )));
                     blink = true;
                 }
@@ -1440,7 +1438,7 @@ void PlayChant()
     case Starting_Song: // Temple Name
         if (digitalRead(4))
         {
-            myDFPlayer.playMp3Folder(0);
+            myDFPlayer.playFolder(0, random(1, 20));
             delay(1000);
             playSong = Time;
         }
@@ -1518,19 +1516,22 @@ void PlayChant()
             }
             else
             {
-                myDFPlayer.playMp3Folder(random(1,config.Song1_Count));
+                myDFPlayer.playMp3Folder(random(1, config.Song1_Count));
                 delay(1000);
-                playSong = Song_2;
+                if (config.Song2_Count != 0)
+                    playSong = Song_2;
+                else
+                    playSong = End_of_Song;
             }
         }
         break;
     case Song_2:
-        // if (digitalRead(STA_PIN))
-        // {
-        //     myDFPlayer.playFolder(6,random(1,config.Song2_Count));
-        //     delay(1000);
+        if (digitalRead(4))
+        {
+            myDFPlayer.playFolder(6, random(1, config.Song2_Count));
+            delay(1000);
             playSong = End_of_Song;
-        // }
+        }
         break;
     case End_of_Song:
         if (digitalRead(4))

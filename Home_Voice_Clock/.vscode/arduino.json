@@ -1,0 +1,7 @@
+{
+    "sketch": "sevensegment\\sevensegment.ino",
+    "board": "arduino:avr:uno",
+    "output": "./build",
+    "port": "COM8",
+    "programmer": "arduino:arduinoasisp"
+}

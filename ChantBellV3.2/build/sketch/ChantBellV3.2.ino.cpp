@@ -92,17 +92,17 @@ size_t ArraySize(T (&)[N]) { return N; }
 
 #line 91 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void setup();
-#line 188 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+#line 186 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void loop();
-#line 532 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+#line 530 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void TriggerLights();
-#line 578 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+#line 576 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void TriggerPlayer();
-#line 1325 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+#line 1323 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void startPreSong(byte fol, byte song);
-#line 1331 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+#line 1329 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void stopPreSong();
-#line 1338 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
+#line 1336 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void PlayChant();
 #line 91 "e:\\Arduino\\Arduino Git\\ChantBellV3.2\\ChantBellV3.2.ino"
 void setup()
@@ -130,10 +130,10 @@ void setup()
     lcd.print(F("DEVOTIONAL CLOCK"));
     delay(2000);
     lcd.clear();
-    lcd.setCursor(0,0);
+    lcd.setCursor(0, 0);
     inttostr(intstr, config.DataYear);
     lcd.print(fmt(strbuf, 2, "Ver : 3.2/", intstr));
-    lcd.setCursor(0,1);
+    lcd.setCursor(0, 1);
     inttostr(intstr, config.SerialNo);
     lcd.print(fmt(strbuf, 2, "Serial No : 0", intstr));
     delay(2000);
@@ -163,7 +163,6 @@ void setup()
         delay(2000);
         serviceMode = true;
     }
-    
 
     // Initialize DF Player...............
     if (digitalRead(BACK_BUT))
@@ -194,12 +193,11 @@ void setup()
         appMode = APP_MENU_MODE;
         refreshMenuDisplay(REFRESH_DESCEND);
     }
-    
+
     if (!digitalRead(SELECT_BUT) && !digitalRead(BACK_BUT))
         testMode = true;
     else
         testMode = false;
-    
 }
 
 void loop()
@@ -320,7 +318,7 @@ void loop()
                      bell.hour() == 16))
                 {
                     lcd.clear();
-                    lcd.setCursor(0,0);
+                    lcd.setCursor(0, 0);
                     lcd.print("School Zone : ON");
                     delay(1000);
                     lcd.clear();
@@ -334,7 +332,7 @@ void loop()
                 }
             }
         }
-        // TEST MODE //   
+        // TEST MODE //
         {
             if (btn == BUTTON_UP_PRESSED && testMode)
             {
@@ -344,7 +342,7 @@ void loop()
                 else
                     rtc.adjust(DateTime(rtc.now().year(), rtc.now().month(), rtc.now().day(), rtc.now().hour(), 59, 55));
             }
-        }   
+        }
         if (millis() - timr_Time > 1000)
         {
             timr_Time = millis();
@@ -390,7 +388,7 @@ void loop()
         // delay(1000);
         bell = DateTime(rtc.now().year(), rtc.now().month(), rtc.now().day(), demoTime, 0, 0);
         PlayChant();
-        if (btn == BUTTON_DOWN_PRESSED)
+        if (btn == BUTTON_LEFT_PRESSED)
         {
             playSong = End_of_Song;
             myDFPlayer.stop();
@@ -431,9 +429,9 @@ void loop()
             appMode = APP_NORMAL_MODE;
             lcd.clear();
         }
-    
-        if (Menu1.getCurrentItemCmdId() == 1 ||  
-            Menu1.getCurrentItemCmdId() == mnuCmdSetDate || 
+
+        if (Menu1.getCurrentItemCmdId() == 1 ||
+            Menu1.getCurrentItemCmdId() == mnuCmdSetDate ||
             Menu1.getCurrentItemCmdId() == mnuCmdSetTime)
         {
             StDate = rtc.now().day();
@@ -511,7 +509,7 @@ void loop()
         }
         break;
     }
-    
+
     case APP_PLAYER_MODE:
     {
         digitalWrite(AMP, HIGH);
@@ -1202,7 +1200,7 @@ byte processMenuCommand(byte cmdId)
         }
         break;
     }
-    
+
     case mnuCmdReset:
     {
         if (btn == BUTTON_SELECT_LONG_PRESSED)
@@ -1360,7 +1358,7 @@ void PlayChant()
     case Starting_Song: // Temple Name
         if (digitalRead(STA_PIN))
         {
-            myDFPlayer.playMp3Folder(0);
+            myDFPlayer.playFolder(0, random(1, 20));
             delay(1000);
             playSong = Time;
         }
@@ -1438,19 +1436,22 @@ void PlayChant()
             }
             else
             {
-                myDFPlayer.playMp3Folder(random(1,config.Song1_Count));
+                myDFPlayer.playMp3Folder(random(1, config.Song1_Count));
                 delay(1000);
-                playSong = Song_2;
+                if (config.Song2_Count != 0)
+                    playSong = Song_2;
+                else
+                    playSong = End_of_Song;
             }
         }
         break;
     case Song_2:
-        // if (digitalRead(STA_PIN))
-        // {
-        //     myDFPlayer.playFolder(6,random(1,config.Song2_Count));
-        //     delay(1000);
+        if (digitalRead(STA_PIN))
+        {
+            myDFPlayer.playFolder(6, random(1, config.Song2_Count));
+            delay(1000);
             playSong = End_of_Song;
-        // }
+        }
         break;
     case End_of_Song:
         if (digitalRead(STA_PIN))

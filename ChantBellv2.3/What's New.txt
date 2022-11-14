@@ -1,0 +1,4 @@
+randomSeed
+remove menu backlight duration
+remove Morning Song2
+remove Evening Song2

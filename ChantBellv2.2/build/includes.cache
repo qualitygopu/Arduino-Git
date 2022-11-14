@@ -17,7 +17,12 @@
   {
     "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2\\build\\sketch\\ChantBellv2.2.ino.cpp",
     "Include": "RTClib.h",
-    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib"
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2\\build\\sketch\\ChantBellv2.2.ino.cpp",
+    "Include": "Adafruit_I2CDevice.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO"
   },
   {
     "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2\\build\\sketch\\ChantBellv2.2.ino.cpp",
@@ -65,7 +70,57 @@
     "Includepath": null
   },
   {
-    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\RTClib.cpp",
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_DS1307.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_DS3231.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_Micros.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_Millis.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_PCF8523.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_PCF8563.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTClib.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_BusIO_Register.cpp",
+    "Include": "SPI.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\MiniCore\\hardware\\avr\\2.1.3\\libraries\\SPI\\src"
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_BusIO_Register.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp",
     "Include": "",
     "Includepath": null
   },
@@ -81,6 +136,11 @@
   },
   {
     "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\MiniCore\\hardware\\avr\\2.1.3\\libraries\\SPI\\src\\SPI.cpp",
     "Include": "",
     "Includepath": null
   }

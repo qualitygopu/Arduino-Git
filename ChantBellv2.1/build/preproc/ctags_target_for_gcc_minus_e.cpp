@@ -117,7 +117,7 @@ void setup()
     {
         serviceMode = false;
     }
-    while (!rtc.begin())
+    while (!r b tc.begin())
     {
         lcd.clear();
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(

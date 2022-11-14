@@ -1,0 +1,132 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\cores\\arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\variants\\standard"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "Wire.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\Wire\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "RTClib.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "Adafruit_I2CDevice.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "SoftwareSerial.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\SoftwareSerial\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "DFRobotDFPlayerMini.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\DFRobotDFPlayerMini"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "IRremote.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "EEPROM.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\EEPROM\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\Home_Voice_Clock\\build\\sketch\\sevensegment.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\Wire\\src\\Wire.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\Wire\\src\\utility\\twi.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_DS1307.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_DS3231.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_Micros.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_Millis.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_PCF8523.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTC_PCF8563.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\src\\RTClib.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_BusIO_Register.cpp",
+    "Include": "SPI.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\SPI\\src"
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_BusIO_Register.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\SoftwareSerial\\src\\SoftwareSerial.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\DFRobotDFPlayerMini\\DFRobotDFPlayerMini.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\SPI\\src\\SPI.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]

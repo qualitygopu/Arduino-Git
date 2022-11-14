@@ -131,7 +131,7 @@ void setup()
         delay(2000);
     }
     // Initialize DF Player...............
-    if (digitalRead(BACK_BUT))
+    // if (digitalRead(BACK_BUT))
     {
         mySoftwareSerial.begin(9600);
         delay(500);
@@ -881,7 +881,7 @@ void PlayChant()
     case Starting_Song: // Temple Name
         if (digitalRead(STA_PIN))
         {
-            myDFPlayer.playMp3Folder(0);
+            myDFPlayer.playFolder(0, random(1, 20));
             delay(1000);
             playSong = Time;
         }
@@ -961,17 +961,20 @@ void PlayChant()
             {
                 myDFPlayer.playMp3Folder(random(1,config.Song1_Count));
                 delay(1000);
-                playSong = Song_2;
+                if (config.Song2_Count != 0)
+                    playSong = Song_2;
+                else
+                    playSong = End_of_Song;
             }
         }
         break;
     case Song_2:
-        // if (digitalRead(STA_PIN))
-        // {
-        //     myDFPlayer.playFolder(6,random(1,config.Song2_Count));
-        //     delay(1000);
+         if (digitalRead(STA_PIN))
+         {
+            myDFPlayer.playFolder(6,random(1,config.Song2_Count));
+            delay(1000);
             playSong = End_of_Song;
-        // }
+         }
         break;
     case End_of_Song:
         if (digitalRead(STA_PIN))

@@ -7,7 +7,7 @@ const int DIO = 4;
 TM1637Display display(CLK, DIO);
 
 enum MOTORSTATE
-{0
+{
   ON,
   OFF
 };

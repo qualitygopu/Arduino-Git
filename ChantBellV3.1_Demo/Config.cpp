@@ -9,7 +9,7 @@ const char* gods[] = {"Amman", "Vinayagar", "Sivan", "Perumal", "Murugan", "Veer
 const char* demoSong[] = {"Amman Potri", "Amman Songs", "Vinayagar Potri", 
                           "Vinayagar Songs", "Sivan Potri", "Sivan Songs", 
                           "Perumal Songs", "Murugan Potri", "Murugan Songs", 
-                          "Ramar Songs", "Abirami Anthathi", "Thirukural"};
+                          "Ramar Songs", "Abirami Anthathi", "Thirukural", "Bagavath Geethai"};
 short voiceCount = sizeof(gods)/sizeof(gods[0]);
 short demoSongCount = sizeof(demoSong)/sizeof(demoSong[0]);
 
@@ -105,7 +105,7 @@ char *Config::getFormattedStr(byte cmdId)
     fmt(strbuf, 2, h, endTime >= 12 ? ":00 PM" : ":00 AM");
     break;
   case mnuCmdSlogamCount:
-    fmt(strbuf, 2, inttostr(intbuf, SlogamCount), " Songs");
+    fmt(strbuf, 2, inttostr(intbuf, Song1_Count), " Songs");
     break;
   case mnuCmdBakLitDur:
     fmt(strbuf, 2, inttostr(intbuf, backLightDur), " Seconds");
@@ -188,7 +188,7 @@ char *Config::getFormattedStr(byte cmdId)
 void Config::setDefaults()
 {
   strcpy(appNameAndVersion, NameAndVersion);
-  SlogamCount = 100;
+  Song1_Count = 100;
   startTime = 5; //5AM
   endTime = 22; // 10PM
   backLightDur = 20; //Sec

@@ -20,7 +20,7 @@ void Config::setDefaults()
   MorSongNo = 1;
   EveSongNo = 2;
   SchlZone = 0;
-  SerialNo = 200;
+  SerialNo = 240;
   DataYear = 2022;
 }
 

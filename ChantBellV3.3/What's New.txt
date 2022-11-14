@@ -1,0 +1,12 @@
+v3.3
+Add Selected Time Alarm ON / OFF using Menu
+Add Selected Panchagam Alarm ON / OFF using Menu
+Set Slogam Count 0 to Slogam OFF
+Add Password for Data Year Change
+
+
+v3.2
+randomSeed
+remove menu backlight duration
+remove Morning Song2
+remove Evening Song2

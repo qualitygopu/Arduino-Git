@@ -35,7 +35,7 @@ void Config::setDefaults()
   AutoLight = 0;
   SchlZone = 0;
 
-  SerialNo = 204;
+  SerialNo = 315;
   DataYear = 2022;
 }
 

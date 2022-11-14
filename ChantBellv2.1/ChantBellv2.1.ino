@@ -100,7 +100,7 @@ void setup()
     {
         serviceMode = false;
     }
-    while (!rtc.begin())
+    while (!r b tc.begin())
     {
         lcd.clear();
         lcd.print(F("ERR 01")); // Couldn't find RTC
