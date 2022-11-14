@@ -22,7 +22,7 @@ const int DIO = 4;
 TM1637Display display(CLK, DIO);
 
 enum MOTORSTATE
-{
+{0
   ON,
   OFF
 };
@@ -34,7 +34,7 @@ bool waterflow, flowFailure;
 long tim_on, tim_off, tim_setlow = 0, tim_progres = 0, tim_lowOn = 0, tim_buzr = 0, timr_rota, timr_wflow;
 bool Pow_on = false, lowOn = false, disON = false, highOff = false;
 int AutoMode = 0, LowLevel = 20;
-MOTORSTATE MotorState;
+byte MotorState;
 // uint8_t numberToPrint[2];
 uint8_t numberB[] = {
     B00111111, //0

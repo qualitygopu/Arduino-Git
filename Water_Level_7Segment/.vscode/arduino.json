@@ -1,7 +1,8 @@
 {
-    "board": "arduino:avr:uno",
+    "board": "MiniCore:avr:8",
     "port": "COM8",
     "output": "./build",
-    "programmer": "arduino:arduinoasisp",
-    "sketch": "Water_Level_7Segment.ino"
+    "programmer": "MiniCore:arduinoasisp",
+    "sketch": "Water_Level_7Segment.ino",
+    "configuration": "bootloader=uart0,eeprom=erase,BOD=2v7,LTO=Os_flto,clock=16MHz_external"
 }

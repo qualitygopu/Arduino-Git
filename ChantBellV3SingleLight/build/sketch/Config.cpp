@@ -79,12 +79,12 @@ char *Config::getFormattedStr(byte cmdId)
   switch (cmdId)
   {
   case mnuCmdSetDate:
-  case mnuCmdSetMonth:
-  case mnuCmdSetYear:
+  // case mnuCmdSetMonth:
+  // case mnuCmdSetYear:
     toDateStr(strbuf);
     break;
-  case mnuCmdSetHour:
-  case mnuCmdSetMin:
+  case mnuCmdSetTime:
+  // case mnuCmdSetMin:
     toTimeStr(strbuf, ((StHr*60L) + StMin));
     break;
   case mnuCmdStartTime:
@@ -140,26 +140,26 @@ char *Config::getFormattedStr(byte cmdId)
     fmt(strbuf, 1, h);
     break;
   case mnuCmdLt1OnTime:
-  case mnuCmdLt1OnHr:
-  case mnuCmdLt1OnMin:
+  // case mnuCmdLt1OnHr:
+  // case mnuCmdLt1OnMin:
     toTimeStr(strbuf, Light1On);
     break;
   case mnuCmdLt1OffTime:  
-  case mnuCmdLt1OffHr:
-  case mnuCmdLt1OffMin:
+  // case mnuCmdLt1OffHr:
+  // case mnuCmdLt1OffMin:
     toTimeStr(strbuf, Light1Off);
     break;
   case mnuCmdPlrMorOnTime:
-  case mnuCmdPlrMorHr:
-  case mnuCmdPlrMorMin:
+  // case mnuCmdPlrMorHr:
+  // case mnuCmdPlrMorMin:
     toTimeStr(strbuf, PlayerMorTime);
     break;
   case mnuCmdPlrMorDur:
     toDurStr(strbuf, PlayerMorDur);
     break;
   case mnuCmdPlrEveOnTime:
-  case mnuCmdPlrEveHr:
-  case mnuCmdPlrEveMin:
+  // case mnuCmdPlrEveHr:
+  // case mnuCmdPlrEveMin:
     toTimeStr(strbuf, PlayerEveTime);
     break;
   case mnuCmdPlrEveDur:
@@ -179,7 +179,7 @@ char *Config::getFormattedStr(byte cmdId)
 void Config::setDefaults()
 {
   strcpy(appNameAndVersion, NameAndVersion);
-  SlogamCount = 50;
+  SlogamCount = 100;
   startTime = 5; //5AM
   endTime = 22; // 10PM
   backLightDur = 20; //Sec
@@ -194,17 +194,19 @@ void Config::setDefaults()
   MorSongNo = 1;
   EveSongNo = 2;
 
-  Light1On = 0;
-  Light1Off = 0;
+  Light1On = 1079;
+  Light1Off = 359;
   Light2On = 0;
   Light2Off = 0;
-  PlayerMorTime = 0;
-  PlayerMorDur= 0;
-  PlayerEveTime = 0;
-  PlayerEveDur = 0;
+  PlayerMorTime = 300;
+  PlayerMorDur= 115;
+  PlayerEveTime = 1020;
+  PlayerEveDur = 115;
 
   AutoPlay = 0;
   AutoLight = 0;
+
+  DataYear = 2022;
 }
 
 void Config::save()

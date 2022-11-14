@@ -1,4 +1,4 @@
-#line 1 "e:\\Arduino\\Arduino Git\\ChantBell\\Config.cpp"
+#line 1 "e:\\Arduino\\Arduino Git\\ChantBellv2\\Config.cpp"
 #include "Config.h"
 #include "LcdKeypad.h"
 #include "MenuData.h"
@@ -147,6 +147,8 @@ void Config::setDefaults()
   EveSong1Time = 3;
   MorSongNo = 1;
   EveSongNo = 2;
+  
+  DataYear = 2022;
 }
 
 void Config::save()

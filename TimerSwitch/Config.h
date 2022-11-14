@@ -3,9 +3,8 @@
 #include "Arduino.h"
 const char NameAndVersion[] = "TimerSwitch V1.0";
 extern char *toTimeStr(char *buf, long timeval, char separator = ':');
-extern char *toDateStr(char *buf, char separator = '/');
 extern long addToTime(short delta, long timeval, long minval = 0, long maxval = 1439);
-extern short StDate, StMonth, StYear, StHr, StMin;
+extern short StHr, StMin;
 class Config
 {
     public:

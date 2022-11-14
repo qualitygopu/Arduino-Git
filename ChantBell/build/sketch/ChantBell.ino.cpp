@@ -15,6 +15,7 @@
 
 int ampDelay = 5000;
 unsigned long timrAmp, timrLCD, timr_Time, timrMNU;
+long menuTimeout = 30000;
 SoftwareSerial mySoftwareSerial(2, 3); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -55,13 +56,14 @@ void PlayChant(short hr);
 byte processMenuCommand(byte cmdId);
 void showTime();
 
-#line 56 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+#line 57 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
 void setup();
-#line 118 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+#line 128 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
 void loop();
-#line 56 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+#line 57 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
 void setup()
 {
+    char intstr[5];
     //Serial.begin(9600);
     pinMode(AMP, OUTPUT);
     pinMode(STA_PIN, INPUT_PULLUP);
@@ -70,17 +72,25 @@ void setup()
     pinMode(DOWN_BUT, INPUT_PULLUP);
     pinMode(BACK_BUT, INPUT_PULLUP);
     Wire.begin();
+    config.load();
     lcd.init();
     lcd.backlight();
     lcd.setCursor(5, 0);
-    lcd.print(F("WELCOME"));
-    lcd.setCursor(6, 1);
     lcd.print(F("QTRON"));
+    lcd.setCursor(1, 1);
+    lcd.print(F("MUSICAL CLOCK"));
+    delay(2000);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(F("Version : 1.0"));
+    lcd.setCursor(0,1);
+    inttostr(intstr, config.SerialNo);
+    lcd.print(fmt(strbuf, 2, "Serial No : 0", intstr));
     delay(2000);
     lcd.clear();
     lcd.setCursor(3,0);
     lcd.print("Loading...");
-    config.load();
+    
     if (!digitalRead(SELECT_BUT)) {
       lcd.setCursor(0, 1);
       lcd.print("Service Mode");  
@@ -124,11 +134,11 @@ void setup()
 }
 void loop()
 {
-  if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
-  {
-    delay(10000);
-    rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),2));        
-  }  
+//   if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
+//   {
+//     delay(10000);
+//     rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),5));        
+//   }  
   
     btn = getButton();
     if (btn)
@@ -162,7 +172,7 @@ void loop()
           selButPreCount +=1;
           if (selButPreCount >= 4) 
           {
-            demoTime = random(6,18);
+            demoTime = random(5,18);
             appMode = APP_DEMO_MODE;
             lcd.clear();
           }          
@@ -290,7 +300,7 @@ void loop()
     }
     case APP_MENU_MODE:
     {
-        if (millis() - timrMNU > 10000)
+        if (millis() - timrMNU > menuTimeout)
         {
           Menu1.reset();
           appMode = APP_NORMAL_MODE;

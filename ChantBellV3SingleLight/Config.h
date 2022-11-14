@@ -14,7 +14,7 @@ class Config
     short startTime, endTime; 
     short backLightDur, vol;
     byte AutoPlay, AutoLight;
-    int SlogamOrder, SlogamCount, SongCount, SongOrder;
+    int SlogamOrder, SlogamCount, SongCount, SongOrder, DataYear;
     short MorSong1Time, MorSong2Time, EveSong1Time, EveSong2Time, MorSongNo, EveSongNo;
     long Light1On, Light1Off, Light2On, Light2Off, PlayerMorTime, PlayerMorDur, PlayerEveTime, PlayerEveDur;
     char *getFormattedStr(byte cmdId);

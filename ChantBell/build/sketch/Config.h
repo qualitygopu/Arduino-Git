@@ -13,7 +13,7 @@ class Config
     char appNameAndVersion[sizeof(NameAndVersion)];
     short startTime, endTime; 
     short backLightDur, vol;
-    int SlogamOrder, SlogamCount, SongCount, SongOrder;
+    int SlogamOrder, SlogamCount, SongCount, SongOrder, SerialNo;
     short MorSong1Time, MorSong2Time, EveSong1Time, EveSong2Time, MorSongNo, EveSongNo;
     char *getFormattedStr(byte cmdId);
     void save();

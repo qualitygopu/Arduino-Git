@@ -8,7 +8,7 @@
 #define LOAD A3
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-RTC_DS3231 rtc;
+RTC_DS1307 rtc;
 unsigned long timrAmp, timrLCD, timr_Time, timrMNU, timrShowtimr;
 MenuManager Menu1(sampleMenu_Root, menuCount(sampleMenu_Root));
 Config config;
@@ -16,8 +16,7 @@ byte btn;
 char strbuf[LCD_COLS + 1];
 byte Load1ON = 0;
 int CurTime;
-String months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
+bool blink = true;
 enum AppModeValues
 {
     APP_NORMAL_MODE,
@@ -25,6 +24,14 @@ enum AppModeValues
     APP_PROCESS_MENU_CMD,
     APP_SHOWTIMER_MODE
 };
+
+enum BlinkMode
+{
+    setHr,
+    setMin
+};
+byte blinkMode = setHr;
+
 byte appMode = APP_NORMAL_MODE;
 
 void refreshMenuDisplay(byte refreshMode);
@@ -34,8 +41,11 @@ void showTime();
 
 void setup()
 {
-    Serial.begin(9600);
     pinMode(LOAD, OUTPUT);
+    pinMode(SELECT_BUT, INPUT_PULLUP);
+    pinMode(UP_BUT, INPUT_PULLUP);
+    pinMode(DOWN_BUT, INPUT_PULLUP);
+    pinMode(BACK_BUT, INPUT_PULLUP);
     lcd.init();
     lcd.backlight();
     lcd.setCursor(5, 0);
@@ -44,19 +54,19 @@ void setup()
     lcd.print(F("QTRON"));
     delay(2000);
     lcd.clear();
-    lcd.setCursor(3, 0);
+    lcd.setCursor(3,0);
     lcd.print("Loading...");
     config.load();
     while (!rtc.begin())
     {
         lcd.clear();
-        lcd.print(F("ERR 01")); // Couldn't find RTC
+        lcd.print(("ERR 01")); // Couldn't find RTC
     }
 
-    if (rtc.lostPower())
+    if (!rtc.isrunning())
     {
         lcd.clear();
-        lcd.print(F("ERR 02"));
+        lcd.print(("ERR 02"));
         delay(2000);
     }
     lcd.clear();
@@ -129,18 +139,21 @@ void loop()
 
         if (Menu1.getCurrentItemCmdId() == 1)
         {
-            StDate = rtc.now().day();
-            StMonth = rtc.now().month();
-            StYear = rtc.now().year();
             StHr = rtc.now().hour();
             StMin = rtc.now().minute();
         }
-        if (btn == BUTTON_LEFT_LONG_PRESSED)
+        if (Menu1.getCurrentItemCmdId() == mnuCmdSetTime || 
+            Menu1.getCurrentItemCmdId() == mnuCmdOnTime || 
+            Menu1.getCurrentItemCmdId() == mnuCmdOffTime)
         {
-            Menu1.reset();
-            appMode = APP_NORMAL_MODE;
-            lcd.clear();
+            blinkMode = setHr;
         }
+        // if (btn == BUTTON_LEFT_LONG_PRESSED)
+        // {
+        //     Menu1.reset();
+        //     appMode = APP_NORMAL_MODE;
+        //     lcd.clear();
+        // }
         byte menuMode = Menu1.handleNavigation(getNavAction, refreshMenuDisplay);
 
         if (menuMode == MENU_EXIT)
@@ -187,7 +200,7 @@ void loop()
 void showTime()
 {
     char intbuf[8];
-    char h[3], m[3], s[3], dat[3], mon[4], year[5];
+    char h[3], m[3], s[3];
 
     inttostr(intbuf, rtc.now().twelveHour());
     lpad(h, intbuf, '0', 2);
@@ -200,14 +213,6 @@ void showTime()
 
     lcd.print(fmt(strbuf, 6, h, ":", m, ":", s, rtc.now().isPM() ? " PM" : " AM"));
 
-    inttostr(intbuf, rtc.now().day());
-    lpad(dat, intbuf, '0', 2);
-    inttostr(intbuf, rtc.now().year());
-    lpad(year, intbuf, '0', 4);
-    strcpy(mon, months[rtc.now().month() - 1].c_str());
-
-    lcd.setCursor(2, 1);
-    lcd.print(fmt(strbuf, 5, dat, "-", mon, "-", year));
 }
 
 void TriggerLoad()
@@ -218,7 +223,6 @@ void TriggerLoad()
         {
             if (Load1ON == 0)
             {
-                Serial.println("Light ON");
                 digitalWrite(LOAD, HIGH);
                 Load1ON = 1;
             }
@@ -227,7 +231,6 @@ void TriggerLoad()
         {
             if (Load1ON == 1)
             {
-                Serial.println("Light OFF");
                 digitalWrite(LOAD, LOW);
                 Load1ON = 0;
             }
@@ -239,7 +242,6 @@ void TriggerLoad()
         {
             if (Load1ON == 1)
             {
-                Serial.println("Light OFF");
                 digitalWrite(LOAD, LOW);
                 Load1ON = 0;
             }
@@ -248,7 +250,6 @@ void TriggerLoad()
         {
             if (Load1ON == 0)
             {
-                Serial.println("Light ON");
                 digitalWrite(LOAD, HIGH);
                 Load1ON = 1;
             }
@@ -261,206 +262,140 @@ byte processMenuCommand(byte cmdId)
     byte complete = false; // set to true when menu command processing complete.
     byte configChanged = false;
 
-    if (btn == BUTTON_SELECT_PRESSED)
-    {
-        complete = true;
-    }
     switch (cmdId)
     {
-    case mnuCmdSetDate:
+    case mnuCmdSetTime:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            StDate = ++StDate > 31 ? 1 : StDate;
+            if (blinkMode == setHr)
+                StHr = ++StHr > 23 ? 0 : StHr;
+            else if (blinkMode == setMin)
+                StMin = ++StMin > 59 ? 0 : StMin;
         }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        else if (btn == BUTTON_DOWN_PRESSED)
         {
-            StDate = --StDate < 1 ? 31 : StDate;
+            if (blinkMode == setHr)
+                StHr = --StHr < 0 ? 23 : StHr;
+            else if (blinkMode == setMin)
+                StMin = --StMin < 0 ? 59 : StMin;
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                rtc.adjust(DateTime(2022, 1, 1, StHr, StMin, 0));
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdSetMonth:
+    case mnuCmdOnTime:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            StMonth = ++StMonth > 12 ? 1 : StMonth;
+            if (blinkMode == setHr)
+                config.timer1On = addToTime(60, config.timer1On);
+            else if (blinkMode == setMin)
+                config.timer1On = addToTime(1, config.timer1On);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            StMonth = --StMonth < 1 ? 12 : StMonth;
+            if (blinkMode == setHr)
+                config.timer1On = addToTime(-60, config.timer1On);
+            else if (blinkMode == setMin)
+                config.timer1On = addToTime(-1, config.timer1On);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
-        else
-        {
-            configChanged = false;
-        }
+
         break;
     }
-    case mnuCmdSetYear:
+    case mnuCmdOffTime:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            StYear = ++StYear > 2050 ? 1 : StYear;
+            if (blinkMode == setHr)
+                config.timer1Off = addToTime(60, config.timer1Off);
+            else if (blinkMode == setMin)
+                config.timer1Off = addToTime(1, config.timer1Off);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            StYear = --StYear < 1 ? 2020 : StYear;
+            if (blinkMode == setHr)
+                config.timer1Off = addToTime(-60, config.timer1Off);
+            else if (blinkMode == setMin)
+                config.timer1Off = addToTime(-1, config.timer1Off);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdSetHour:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            StHr = ++StHr > 23 ? 0 : StHr;
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            StHr = --StHr < 0 ? 23 : StHr;
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdSetMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            StMin = ++StMin > 59 ? 0 : StMin;
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            StMin = --StMin < 0 ? 59 : StMin;
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdt1onHour:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.timer1On = addToTime(60, config.timer1On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.timer1On = addToTime(-60, config.timer1On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdt1onMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.timer1On = addToTime(1, config.timer1On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.timer1On = addToTime(-1, config.timer1On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdt1offHour:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.timer1Off = addToTime(60, config.timer1Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.timer1Off = addToTime(-60, config.timer1Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdt1offMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.timer1Off = addToTime(1, config.timer1Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.timer1Off = addToTime(-1, config.timer1Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
     }
-    if (configChanged)
+    if (btn == BUTTON_LEFT_SHORT_RELEASE || complete )
+    {
+        complete = true;
+        lcd.setCursor(1, 1);
+        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+    }
+    else if (configChanged)
     {
         lcd.setCursor(1, 1);
-        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId))); // Display config value.
+        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+    }
+    else
+    {
+        if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            { 
+                lcd.setCursor(1, 1);
+                lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+                blink = false;
+            }
+            else
+            {
+                if (cmdId == mnuCmdSetTime ||
+                    cmdId == mnuCmdOnTime ||
+                    cmdId == mnuCmdOffTime)
+                {
+                    if (blinkMode == setHr)
+                        lcd.setCursor(1,1);
+                    if (blinkMode == setMin)
+                        lcd.setCursor(4,1);
+                    lcd.print(("  "));
+                    blink = true;
+                }
+            }     
+            timr_Time = millis();       
+          }
     }
     return complete;
 }
@@ -490,10 +425,10 @@ void refreshMenuDisplay(byte refreshMode)
     if (Menu1.currentItemHasChildren())
     {
         rpad(strbuf, Menu1.getCurrentItemName(nameBuf));
-        strbuf[LCD_COLS - 1] = 0b01111110; // Display forward arrow if this menu item has children.
-        lcd.print(strbuf);
-        lcd.setCursor(0, 1);
-        lcd.print(rpad(strbuf, EmptyStr)); // Clear config value in display
+        // strbuf[LCD_COLS - 1] = 0b01111110; // Display forward arrow if this menu item has children.
+        // lcd.print(strbuf);
+        // lcd.setCursor(0, 1);
+        // lcd.print(rpad(strbuf, EmptyStr)); // Clear config value in display
     }
     else
     {

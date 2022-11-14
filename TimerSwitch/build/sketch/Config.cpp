@@ -3,9 +3,8 @@
 #include "LcdKeypad.h"
 #include "MenuData.h"
 #include <avr/eeprom.h>
-short StDate, StMonth, StYear, StHr, StMin, demoTime = 5;
+short StHr, StMin;
 static char strbuf[LCD_COLS + 1];
-const char NotImp[] = "-----";
 char *toTimeStr(char *buf, long timeval, char separator)
 {
   char sepstr[] = {separator, 0};
@@ -26,22 +25,22 @@ char *toTimeStr(char *buf, long timeval, char separator)
   return buf;
 }
 
-char *toDateStr(char *buf, char separator)
-{
-  char sepstr[] = {separator, 0};
-  char intbuf[8];
-  char dat[3], mon[3], year[5];
+// char *toDateStr(char *buf, char separator)
+// {
+//   char sepstr[] = {separator, 0};
+//   char intbuf[8];
+//   char dat[3], mon[3], year[5];
 
-  inttostr(intbuf, StDate);
-  lpad(dat, intbuf, '0', 2);
-  inttostr(intbuf, StMonth);
-  lpad(mon, intbuf, '0', 2);
-  inttostr(intbuf, StYear);
-  lpad(year, intbuf, '0', 4);
+//   inttostr(intbuf, StDate);
+//   lpad(dat, intbuf, '0', 2);
+//   inttostr(intbuf, StMonth);
+//   lpad(mon, intbuf, '0', 2);
+//   inttostr(intbuf, StYear);
+//   lpad(year, intbuf, '0', 4);
 
-  fmt(buf, 5, dat, sepstr, mon, sepstr, year);
-  return buf;
-}
+//   fmt(buf, 5, dat, sepstr, mon, sepstr, year);
+//   return buf;
+// }
 
 long addToTime(short delta, long timeval, long minval, long maxval)
 {
@@ -59,25 +58,14 @@ char *Config::getFormattedStr(byte cmdId)
   char h[3];
   switch (cmdId)
   {
-  case mnuCmdSetDate:
-  case mnuCmdSetMonth:
-  case mnuCmdSetYear:
-    toDateStr(strbuf);
-    break;
-  case mnuCmdSetHour:
-  case mnuCmdSetMin:
+  case mnuCmdSetTime:
     toTimeStr(strbuf, ((StHr * 60L) + StMin));
     break;
-  case mnuCmdt1onHour:
-  case mnuCmdt1onMin:
+  case mnuCmdOnTime:
     toTimeStr(strbuf, timer1On);
     break;
-  case mnuCmdt1offHour:
-  case mnuCmdt1offMin:
+  case mnuCmdOffTime:
     toTimeStr(strbuf, timer1Off);
-    break;
-  default:
-    strcpy(strbuf, NotImp);
     break;
   }
   return strbuf;

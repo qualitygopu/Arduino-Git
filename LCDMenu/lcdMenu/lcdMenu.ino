@@ -839,19 +839,19 @@ String doubledigit(int v)
   return String(v / 10) +
          String(v % 10);
 }
-
+int n=1;
 void playTemple(int t)
 {
   switch (playsong)
   {
   case 1:
     if (digitalRead(STA_PIN))
-    {
-      myDFPlayer.playMp3Folder(0);
-      delay(1000);
-      playsong = 2;
-    }
-    break;
+        {
+            myDFPlayer.playMp3Folder(0);
+            delay(1000);
+            playsong = 2;
+        }
+        break;
   case 2:
     if (digitalRead(STA_PIN))
     {
@@ -863,14 +863,9 @@ void playTemple(int t)
   case 3:
     if (digitalRead(STA_PIN))
     {
-      // if (t == 5)
+      // if (t == 5 || t == 18)
       // {
-      //   myDFPlayer.playFolder(2, 8);
-      //   delay(1000);
-      // }
-      // else if (t == 6)
-      // {
-      //   myDFPlayer.playFolder(2, 9);
+      //   myDFPlayer.playFolder(2, t);
       //   delay(1000);
       // }
       // else

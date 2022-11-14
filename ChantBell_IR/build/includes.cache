@@ -1,0 +1,212 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\cores\\arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\variants\\standard"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\ChantBell_IR.ino.cpp",
+    "Include": "Wire.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\Wire\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\ChantBell_IR.ino.cpp",
+    "Include": "RTClib.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\ChantBell_IR.ino.cpp",
+    "Include": "SoftwareSerial.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\SoftwareSerial\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\ChantBell_IR.ino.cpp",
+    "Include": "DFRobotDFPlayerMini.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\DFRobotDFPlayerMini"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\ChantBell_IR.ino.cpp",
+    "Include": "LiquidCrystal_I2C.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\ChantBell_IR.ino.cpp",
+    "Include": "IRremote.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\ChantBell_IR.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\Config.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\LcdKeypad.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBell_IR\\build\\sketch\\MenuManager.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\Wire\\src\\Wire.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\Wire\\src\\utility\\twi.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\RTClib.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\SoftwareSerial\\src\\SoftwareSerial.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\DFRobotDFPlayerMini\\DFRobotDFPlayerMini.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\IRremote.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\esp32.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\irPronto.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\irReceive.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\irSend.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_BoseWave.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Denon.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Dish.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_JVC.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_LG.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Lego_PF.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_MagiQuest.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_NEC.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Panasonic.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_RC5_RC6.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Samsung.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Sanyo.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Sharp.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Sharp_alt.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Sony.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Template.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\ir_Whynter.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\nRF5.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\IRremote\\src\\sam.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]

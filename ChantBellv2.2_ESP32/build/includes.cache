@@ -1,0 +1,92 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.4\\cores\\esp32"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.4\\variants\\esp32"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\ChantBellv2.2_ESP32.ino.cpp",
+    "Include": "Wire.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.4\\libraries\\Wire\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\ChantBellv2.2_ESP32.ino.cpp",
+    "Include": "RTClib.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\ChantBellv2.2_ESP32.ino.cpp",
+    "Include": "SoftwareSerial.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\EspSoftwareSerial\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\ChantBellv2.2_ESP32.ino.cpp",
+    "Include": "DFRobotDFPlayerMini.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\DFRobotDFPlayerMini"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\ChantBellv2.2_ESP32.ino.cpp",
+    "Include": "LiquidCrystal_I2C.h",
+    "Includepath": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\ChantBellv2.2_ESP32.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\Config.cpp",
+    "Include": "Preferences.h",
+    "Includepath": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.4\\libraries\\Preferences\\src"
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\Config.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\LcdKeypad.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "e:\\Arduino\\Arduino Git\\ChantBellv2.2_ESP32\\build\\sketch\\MenuManager.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.4\\libraries\\Wire\\src\\Wire.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\RTClib\\RTClib.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\EspSoftwareSerial\\src\\SoftwareSerial.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\DFRobotDFPlayerMini\\DFRobotDFPlayerMini.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\quali\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.4\\libraries\\Preferences\\src\\Preferences.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]

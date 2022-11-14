@@ -14,6 +14,7 @@
 
 int ampDelay = 5000;
 unsigned long timrAmp, timrLCD, timr_Time, timrMNU;
+long menuTimeout = 30000;
 SoftwareSerial mySoftwareSerial(2, 3); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -56,6 +57,7 @@ void showTime();
 
 void setup()
 {
+    char intstr[5];
     //Serial.begin(9600);
     pinMode(A3, 0x1);
     pinMode(5, 0x2);
@@ -64,33 +66,49 @@ void setup()
     pinMode(11, 0x2);
     pinMode(12, 0x2);
     Wire.begin();
+    config.load();
     lcd.init();
     lcd.backlight();
     lcd.setCursor(5, 0);
     lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 72 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
              (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
-             "WELCOME"
-# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
-             ); &__c[0];}))
-# 69 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
-             )));
-    lcd.setCursor(6, 1);
-    lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 71 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
-             (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 71 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 72 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
              "QTRON"
-# 71 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 72 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
              ); &__c[0];}))
-# 71 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 72 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
              )));
+    lcd.setCursor(1, 1);
+    lcd.print((reinterpret_cast<const __FlashStringHelper *>(
+# 74 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+             (__extension__({static const char __c[] __attribute__((__progmem__)) = (
+# 74 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+             "MUSICAL CLOCK"
+# 74 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+             ); &__c[0];}))
+# 74 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+             )));
+    delay(2000);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print((reinterpret_cast<const __FlashStringHelper *>(
+# 78 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+             (__extension__({static const char __c[] __attribute__((__progmem__)) = (
+# 78 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+             "Version : 1.0"
+# 78 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+             ); &__c[0];}))
+# 78 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+             )));
+    lcd.setCursor(0,1);
+    inttostr(intstr, config.SerialNo);
+    lcd.print(fmt(strbuf, 2, "Serial No : 0", intstr));
     delay(2000);
     lcd.clear();
     lcd.setCursor(3,0);
     lcd.print("Loading...");
-    config.load();
+
     if (!digitalRead(9)) {
       lcd.setCursor(0, 1);
       lcd.print("Service Mode");
@@ -103,13 +121,13 @@ void setup()
     {
         lcd.clear();
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 88 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 98 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 88 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 98 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  "ERR 01"
-# 88 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 98 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  ); &__c[0];}))
-# 88 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 98 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  ))); // Couldn't find RTC
     }
 
@@ -119,13 +137,13 @@ void setup()
     {
         lcd.clear();
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 96 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 106 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 96 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 106 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  "ERR 02"
-# 96 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 106 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  ); &__c[0];}))
-# 96 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 106 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  )));
         delay(2000);
         serviceMode = true;
@@ -139,13 +157,13 @@ void setup()
          {
              lcd.setCursor(0, 0);
              lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 108 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 118 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                       (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 108 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 118 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                       "ERR 03"
-# 108 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 118 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                       ); &__c[0];}))
-# 108 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 118 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                       )));
          }
          myDFPlayer.setTimeOut(500);
@@ -158,11 +176,11 @@ void setup()
 }
 void loop()
 {
-  if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
-  {
-    delay(10000);
-    rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),2));
-  }
+//   if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
+//   {
+//     delay(10000);
+//     rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),5));        
+//   }  
 
     btn = getButton();
     if (btn)
@@ -196,7 +214,7 @@ void loop()
           selButPreCount +=1;
           if (selButPreCount >= 4)
           {
-            demoTime = random(6,18);
+            demoTime = random(5,18);
             appMode = APP_DEMO_MODE;
             lcd.clear();
           }
@@ -324,7 +342,7 @@ void loop()
     }
     case APP_MENU_MODE:
     {
-        if (millis() - timrMNU > 10000)
+        if (millis() - timrMNU > menuTimeout)
         {
           Menu1.reset();
           appMode = APP_NORMAL_MODE;
@@ -389,13 +407,13 @@ void loop()
     {
         lcd.setCursor(0, 0);
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 350 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 360 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 350 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 360 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  "  RUNNING DEMO  "
-# 350 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
+# 360 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino" 3
                  ); &__c[0];}))
-# 350 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
+# 360 "e:\\Arduino\\Arduino Git\\ChantBell\\ChantBell.ino"
                  )));
         lcd.setCursor(0, 1);
         lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime-12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));

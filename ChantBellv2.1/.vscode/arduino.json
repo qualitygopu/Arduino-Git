@@ -1,0 +1,8 @@
+{
+    "board": "MiniCore:avr:328",
+    "port": "COM8",
+    "output": "./build",
+    "sketch": "ChantBellv2.1.ino",
+    "programmer": "MiniCore:arduinoasisp",
+    "configuration": "bootloader=uart0,eeprom=erase,variant=modelNonP,BOD=2v7,LTO=Os_flto,clock=16MHz_external"
+}

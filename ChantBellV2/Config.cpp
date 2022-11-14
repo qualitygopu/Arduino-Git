@@ -146,6 +146,8 @@ void Config::setDefaults()
   EveSong1Time = 3;
   MorSongNo = 1;
   EveSongNo = 2;
+  
+  DataYear = 2022;
 }
 
 void Config::save()

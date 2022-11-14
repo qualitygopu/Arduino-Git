@@ -1,0 +1,7 @@
+{
+    "board": "arduino:avr:uno",
+    "port": "COM8",
+    "output": "./build",
+    "sketch": "ChantBellV3.1_Demo.ino",
+    "programmer": "arduino:arduinoasisp"
+}

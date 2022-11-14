@@ -1,4 +1,4 @@
-#line 1 "e:\\Arduino\\Arduino Git\\ChantBell\\Config.h"
+#line 1 "e:\\Arduino\\Arduino Git\\ChantBellv2\\Config.h"
 #ifndef CONFIG_H_
 #define CONFIG_H_
 #include "Arduino.h"
@@ -13,7 +13,7 @@ class Config
     char appNameAndVersion[sizeof(NameAndVersion)];
     short startTime, endTime; 
     short backLightDur, vol;
-    int SlogamOrder, SlogamCount, SongCount, SongOrder;
+    int SlogamOrder, SlogamCount, SongCount, SongOrder, DataYear;
     short MorSong1Time, MorSong2Time, EveSong1Time, EveSong2Time, MorSongNo, EveSongNo;
     char *getFormattedStr(byte cmdId);
     void save();

@@ -28,6 +28,7 @@ short upButPreCount = 0,selButPreCount = 0, downButPreCount = 0;
 // RTC_DS3231 rtc;
 RTC_DS1307 rtc;
 
+DateTime bell;
 //blink time 
 bool blink = true, serviceMode = false;
 
@@ -53,6 +54,16 @@ enum AppModeValues
     APP_SETHR_MODE,
     APP_SETMIN_MODE
 };
+
+enum BlinkMode
+{
+    setHr,
+    setMin,
+    setDate,
+    setMonth,
+    setYear
+};
+byte blinkMode = setHr;
 byte appMode = APP_NORMAL_MODE;
 
 void refreshMenuDisplay(byte refreshMode);
@@ -136,6 +147,7 @@ void setup()
     
     //   rtc.adjust(DateTime(2021,07,18,17,59,57));
 }
+
 void loop()
 {
     btn = getButton();
@@ -205,18 +217,17 @@ void loop()
             Light1ON = !Light1ON;
         }
     }
-    if (millis() - timrLCD > 500)
+    if (millis() - timrLCD > 300)
     {
         downButPreCount = 0;
         selButPreCount =0;
         upButPreCount=0;
     }
 
-    if (millis() - timrTrigger > 1000)
+    if (millis() - timrTrigger > 500 && config.AutoLight)
     {
         timrTrigger = millis();
-        if (config.AutoLight)
-            TriggerLights();
+        TriggerLights();
     }
     digitalWrite(AUTOLIGHT, config.AutoLight);
     digitalWrite(AUTOPLAY, config.AutoPlay);
@@ -237,16 +248,17 @@ void loop()
           selButPreCount +=1;
           if (selButPreCount >= 4) 
           {
-            demoTime = random(6,18);
+            demoTime = rtc.now().minute() > 30 ? rtc.now().hour() + 1 : rtc.now().hour();
             appMode = APP_DEMO_MODE;
+            
             lcd.clear();
           }          
         }
 
         if (rtc.now().minute() == 0 && rtc.now().second() == 0 && millis() > timrAmp + 61000L)
         {
-            int hr = rtc.now().hour();
-            if (hr >= config.startTime && hr <= config.endTime) // chek time
+            bell = rtc.now();
+            if (bell.hour() >= config.startTime && bell.hour() <= config.endTime) // chek time
             {
                 digitalWrite(AMP, HIGH);
                 timrAmp = millis();
@@ -381,13 +393,17 @@ void loop()
         lcd.setCursor(0, 1);
         lcd.print("CHANT PLAYING...");
         if (millis() >= timrAmp + ampDelay)
-            PlayChant(rtc.now().hour());
+            PlayChant();
         break;
     }
     case APP_MENU_MODE:
     {
-        if (millis() - timrMNU > 10000)
+        if (millis() - timrMNU > 30000)
         {
+            if (!digitalRead(STA_PIN))
+            {
+                stopPreSong();
+            }
             Menu1.reset();
             appMode = APP_NORMAL_MODE;
             lcd.clear();
@@ -401,6 +417,27 @@ void loop()
             StHr = rtc.now().hour();
             StMin = rtc.now().minute();
         }
+        if (Menu1.getCurrentItemCmdId() == mnuCmdSetTime || 
+            Menu1.getCurrentItemCmdId() == mnuCmdLt1OnTime || 
+            Menu1.getCurrentItemCmdId() == mnuCmdLt1OffTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrMorOnTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrMorDur ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrEveOnTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrEveDur)
+        {
+            blinkMode = setHr;
+        }
+        else if (Menu1.getCurrentItemCmdId() == mnuCmdSetDate)
+        {
+            blinkMode = setDate;
+        }
+        
+        // if (Menu1.getCurrentItemCmdId() == mnuCmdMorSongNo || Menu1.getCurrentItemCmdId() == mnuCmdEveSongNo)
+        // {
+        //     
+        // }
+        
+        
         if (btn == BUTTON_LEFT_LONG_PRESSED)
         {
             Menu1.reset();
@@ -411,6 +448,10 @@ void loop()
 
         if (menuMode == MENU_EXIT)
         {
+            if (!digitalRead(STA_PIN))
+            {
+                stopPreSong();
+            }
             lcd.clear();
             appMode = APP_NORMAL_MODE;
         }
@@ -432,6 +473,10 @@ void loop()
         byte processingComplete = processMenuCommand(Menu1.getCurrentItemCmdId());
         if (millis() - timrMNU > 30000)
         {
+            if (!digitalRead(STA_PIN))
+            {
+                stopPreSong();
+            }
             Menu1.reset();
             appMode = APP_NORMAL_MODE;
             lcd.clear();
@@ -455,7 +500,8 @@ void loop()
         lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime - 12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
         digitalWrite(AMP, HIGH);
         delay(1000);
-        PlayChant(demoTime);
+        bell = DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),demoTime,0,0);
+        PlayChant();
         if (btn == BUTTON_DOWN_PRESSED)
         {
             playSong = 9;
@@ -613,117 +659,85 @@ byte processMenuCommand(byte cmdId)
     byte complete = false; // set to true when menu command processing complete.
     byte configChanged = false;
 
-    if (btn == BUTTON_SELECT_PRESSED)
-    {
-        complete = true;
-    }
+    // if (btn == BUTTON_SELECT_PRESSED)
+    // {
+    //     complete = true;
+    // }
+    
     switch (cmdId)
     {
     case mnuCmdSetDate:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            StDate = ++StDate > 31 ? 1 : StDate;
+            if (blinkMode == setDate)
+                StDate = ++StDate > 31 ? 1 : StDate;
+            else if (blinkMode == setMonth)
+                StMonth = ++StMonth > 12 ? 1 : StMonth;
+            else if (blinkMode == setYear)
+                StYear = ++StYear > 2050 ? 2020 : StYear;
+            
         }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        else if (btn == BUTTON_DOWN_PRESSED)
         {
-            StDate = --StDate < 1 ? 31 : StDate;
+            if (blinkMode == setDate)
+                StDate = --StDate < 1 ? 31 : StDate;
+            else if (blinkMode == setMonth)
+                StMonth = --StMonth < 1 ? 12 : StMonth;
+            else if (blinkMode == setYear)
+                StYear = --StYear < 2050 ? 2020 : StYear;
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setDate)
+            {
+                blinkMode = setMonth;
+            }
+            else if (blinkMode == setMonth)
+            {
+                blinkMode = setYear;
+            }
+            else if (blinkMode == setYear)
+            {
+                rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdSetMonth:
+    case mnuCmdSetTime:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            StMonth = ++StMonth > 12 ? 1 : StMonth;
+            if (blinkMode == setHr)
+                StHr = ++StHr > 23 ? 0 : StHr;
+            else if (blinkMode == setMin)
+                StMin = ++StMin > 59 ? 0 : StMin;
         }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        else if (btn == BUTTON_DOWN_PRESSED)
         {
-            StMonth = --StMonth < 1 ? 12 : StMonth;
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdSetYear:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            StYear = ++StYear > 2050 ? 1 : StYear;
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            StYear = --StYear < 1 ? 2020 : StYear;
+            if (blinkMode == setHr)
+                StHr = --StHr < 0 ? 23 : StHr;
+            else if (blinkMode == setMin)
+                StMin = --StMin < 0 ? 59 : StMin;
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdSetHour:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            StHr = ++StHr > 23 ? 0 : StHr;
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            StHr = --StHr < 0 ? 23 : StHr;
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdSetMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            StMin = ++StMin > 59 ? 0 : StMin;
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            StMin = --StMin < 0 ? 59 : StMin;
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
+   
     case mnuCmdStartTime:
     {
         configChanged = true;
@@ -738,6 +752,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -759,6 +774,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -780,6 +796,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -801,6 +818,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -823,6 +841,7 @@ byte processMenuCommand(byte cmdId)
         {
             config.save();
             myDFPlayer.volume(config.vol);
+            complete = true;
         }
         else
         {
@@ -840,6 +859,10 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
             demoTime = --demoTime < 4 ? 23 : demoTime;
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            complete = true;
         }
         else
         {
@@ -868,6 +891,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -889,6 +913,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -910,6 +935,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -931,6 +957,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -952,6 +979,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == BUTTON_SELECT_PRESSED)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -965,14 +993,18 @@ byte processMenuCommand(byte cmdId)
         if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
         {
             config.MorSongNo = ++config.MorSongNo > 20 ? 1 : config.MorSongNo;
+            startPreSong(2,config.MorSongNo);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
             config.MorSongNo = --config.MorSongNo < 1 ? 20 : config.MorSongNo;
+            startPreSong(2,config.MorSongNo);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
+            stopPreSong();
             config.save();
+            complete = true;
         }
         else
         {
@@ -986,98 +1018,18 @@ byte processMenuCommand(byte cmdId)
         if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
         {
             config.EveSongNo = ++config.EveSongNo > 20 ? 1 : config.EveSongNo;
+            startPreSong(2,config.EveSongNo);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
             config.EveSongNo = --config.EveSongNo < 1 ? 20 : config.EveSongNo;
+            startPreSong(2,config.EveSongNo);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
+            stopPreSong();
             config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OnHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(60, config.Light1On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(-60, config.Light1On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OnMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(1, config.Light1On);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1On = addToTime(-1, config.Light1On);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffHr:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(60, config.Light1Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(-60, config.Light1Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(1, config.Light1Off);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.Light1Off = addToTime(-1, config.Light1Off);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
+            complete = true;
         }
         else
         {
@@ -1086,129 +1038,190 @@ byte processMenuCommand(byte cmdId)
         break;
     }
     
-    case mnuCmdPlrMorHr:
+    case mnuCmdLt1OnTime:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            config.PlayerMorTime = addToTime(60, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.Light1On = addToTime(60, config.Light1On);
+            else if (blinkMode == setMin)
+                config.Light1On = addToTime(1, config.Light1On);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            config.PlayerMorTime = addToTime(-60, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.Light1On = addToTime(-60, config.Light1On);
+            else if (blinkMode == setMin)
+                config.Light1On = addToTime(-1, config.Light1On);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            config.save();
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
-        else
+
+        break;
+    }
+    case mnuCmdLt1OffTime:
+    {
+        if (btn == BUTTON_UP_PRESSED)
         {
-            configChanged = false;
+            if (blinkMode == setHr)
+                config.Light1Off = addToTime(60, config.Light1Off);
+            else if (blinkMode == setMin)
+                config.Light1Off = addToTime(1, config.Light1Off);
+        }
+        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        {
+            if (blinkMode == setHr)
+                config.Light1Off = addToTime(-60, config.Light1Off);
+            else if (blinkMode == setMin)
+                config.Light1Off = addToTime(-1, config.Light1Off);
+        }
+        else if (btn == BUTTON_SELECT_PRESSED)
+        {
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdPlrMorMin:
+    case mnuCmdPlrMorOnTime:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            config.PlayerMorTime = addToTime(1, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.PlayerMorTime = addToTime(60, config.PlayerMorTime);
+            else if (blinkMode == setMin)
+                config.PlayerMorTime = addToTime(1, config.PlayerMorTime);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            config.PlayerMorTime = addToTime(-1, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.PlayerMorTime = addToTime(-60, config.PlayerMorTime);
+            else if (blinkMode == setMin)
+                config.PlayerMorTime = addToTime(-1, config.PlayerMorTime);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
     case mnuCmdPlrMorDur:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            config.PlayerMorDur = addToTime(5, config.PlayerMorDur);
+            if (blinkMode == setHr)
+                config.PlayerMorDur = addToTime(60, config.PlayerMorDur);
+            else if (blinkMode == setMin)
+                config.PlayerMorDur = addToTime(5, config.PlayerMorDur);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            config.PlayerMorDur = addToTime(-5, config.PlayerMorDur);
+            if (blinkMode == setHr)
+                config.PlayerMorDur = addToTime(-60, config.PlayerMorDur);
+            else if (blinkMode == setMin)
+                config.PlayerMorDur = addToTime(-5, config.PlayerMorDur);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdPlrEveHr:
+    case mnuCmdPlrEveOnTime:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            config.PlayerEveTime = addToTime(60, config.PlayerEveTime);
+            if (blinkMode == setHr)
+                config.PlayerEveTime = addToTime(60, config.PlayerEveTime);
+            else if (blinkMode == setMin)
+                config.PlayerEveTime = addToTime(1, config.PlayerEveTime);
         }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
+        else if (btn == BUTTON_DOWN_PRESSED)
         {
-            config.PlayerEveTime = addToTime(-60, config.PlayerEveTime);
+            if (blinkMode == setHr)
+                config.PlayerEveTime = addToTime(-60, config.PlayerEveTime);
+            else if (blinkMode == setMin)
+                config.PlayerEveTime = addToTime(-1, config.PlayerEveTime);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveMin:
-    {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
-        {
-            config.PlayerEveTime = addToTime(1, config.PlayerEveTime);
-        }
-        else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
-        {
-            config.PlayerEveTime = addToTime(-1, config.PlayerEveTime);
-        }
-        else if (btn == BUTTON_SELECT_PRESSED)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
     case mnuCmdPlrEveDur:
     {
-        configChanged = true;
-        if (btn == BUTTON_UP_PRESSED || btn == BUTTON_UP_LONG_PRESSED)
+        if (btn == BUTTON_UP_PRESSED)
         {
-            config.PlayerEveDur = addToTime(5, config.PlayerEveDur);
+            if (blinkMode == setHr)
+                config.PlayerEveDur = addToTime(60, config.PlayerEveDur);
+            else if (blinkMode == setMin)
+                config.PlayerEveDur = addToTime(5, config.PlayerEveDur);
         }
         else if (btn == BUTTON_DOWN_PRESSED || btn == BUTTON_DOWN_LONG_PRESSED)
         {
-            config.PlayerEveDur = addToTime(-5, config.PlayerEveDur);
+            if (blinkMode == setHr)
+                config.PlayerEveDur = addToTime(-60, config.PlayerEveDur);
+            else if (blinkMode == setMin)
+                config.PlayerEveDur = addToTime(-5, config.PlayerEveDur);
         }
         else if (btn == BUTTON_SELECT_PRESSED)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
@@ -1227,10 +1240,59 @@ byte processMenuCommand(byte cmdId)
         break;
     }
     }
-    if (configChanged)
+   
+    if (btn == BUTTON_LEFT_SHORT_RELEASE || complete )
+    {
+        complete = true;
+        lcd.setCursor(1, 1);
+        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+    }
+    else if (configChanged)
     {
         lcd.setCursor(1, 1);
-        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId))); // Display config value.
+        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+    }
+    else
+    {
+        if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            { 
+                lcd.setCursor(1, 1);
+                lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+                blink = false;
+            }
+            else
+            {
+                if (cmdId == mnuCmdSetTime ||
+                    cmdId == mnuCmdLt1OnTime ||
+                    cmdId == mnuCmdLt1OffTime ||
+                    cmdId == mnuCmdPlrMorOnTime ||
+                    cmdId == mnuCmdPlrMorDur ||
+                    cmdId == mnuCmdPlrEveOnTime ||
+                    cmdId == mnuCmdPlrEveDur)
+                {
+                    if (blinkMode == setHr)
+                        lcd.setCursor(1,1);
+                    if (blinkMode == setMin)
+                        lcd.setCursor(4,1);
+                    lcd.print(F("  "));
+                    blink = true;
+                }
+                else if (cmdId == mnuCmdSetDate)
+                {
+                    if (blinkMode == setDate)
+                        lcd.setCursor(1,1);
+                    if (blinkMode == setMonth)
+                        lcd.setCursor(4,1);
+                    if (blinkMode == setYear)
+                        lcd.setCursor(9,1);
+                    lcd.print(F("  "));
+                    blink = true;
+                }
+            }     
+            timr_Time = millis();       
+        }
     }
     return complete;
 }
@@ -1299,37 +1361,96 @@ void refreshMenuDisplay(byte refreshMode)
     }
 }
 
+void startPreSong(byte fol, byte song)
+{
+    digitalWrite(AMP, HIGH);
+    myDFPlayer.playFolder(fol, song);
+    delay(500);
+}
+void stopPreSong()
+{
+    digitalWrite(AMP, LOW);
+    myDFPlayer.stop();
+}
 int n = 1;
-void PlayChant(short hr)
+void PlayChant()
 {
     // Serial.println(String(hr));
-    switch (playSong)
+  switch (playSong)
+  {
+  case 1:                                                             // Temple Name
+   if (digitalRead(STA_PIN))
     {
-    case 1:
-        if (digitalRead(STA_PIN))
+         myDFPlayer.playMp3Folder(0);
+        delay(1000);
+        playSong = 2;
+    }
+    break;
+  case 2:
+    if (digitalRead(STA_PIN))                                           // Time
+    {
+      myDFPlayer.playFolder(1, bell.hour());
+      delay(1000);
+      playSong = 3;
+    }
+    break;
+  case 3:                                                               // English Month
+    if (digitalRead(STA_PIN))
+    {
+      myDFPlayer.playFolder(47, bell.month());
+      delay(1000);
+      playSong = 4;
+    }
+    break;
+  case 4:                                                               // Englidh Date
+    if (digitalRead(STA_PIN))
+    {
+        myDFPlayer.playFolder(48, bell.day());
+        delay(1000);
+        playSong = 5;
+    }
+    break;
+  case 5:                                                               // Day of Week
+    if (digitalRead(STA_PIN))
+    {
+        myDFPlayer.playFolder(49, bell.dayOfTheWeek()+1);
+        delay(1000);
+        playSong = 6;
+    }
+    break;
+  case 6:                                                               // Tamil Date
+  if (digitalRead(STA_PIN))
+    {
+      if (bell.hour() == 6 || bell.hour() == 8 || bell.hour() == 10) 
+      {
+        if ( bell.year() == config.DataYear) 
         {
-            myDFPlayer.playMp3Folder(0);
+            myDFPlayer.playFolder(bell.month() + 50, bell.day());       // current year 
             delay(1000);
-            playSong = 2;
+        } 
+        else if (bell.year() == config.DataYear-1 && bell.month()==12)   // prev year december
+        {
+          myDFPlayer.playFolder(50, bell.day());
+          delay(1000);
         }
-        break;
-    case 2:
+        playSong = 8;
+      }
+      else 
+      {
+        playSong = 8;
+      }
+    }
+    break;
+
+    case 8:
         if (digitalRead(STA_PIN))
         {
-            myDFPlayer.playFolder(1, hr);
-            delay(1000);
-            playSong = 3;
-        }
-        break;
-    case 3:
-        if (digitalRead(STA_PIN))
-        {
-            if (config.MorSong1Time == hr && config.MorSong1Time != 3)
+            if (config.MorSong1Time == bell.hour() && config.MorSong1Time != 3)
             {
                 myDFPlayer.playFolder(2, config.MorSongNo);
                 delay(1000);
             }
-            else if (config.MorSong2Time == hr && config.MorSong2Time != 3)
+            else if (config.MorSong2Time == bell.hour() && config.MorSong2Time != 3)
             {
                 myDFPlayer.playFolder(4, config.SongOrder);
                 config.SongOrder++;
@@ -1338,12 +1459,12 @@ void PlayChant(short hr)
                 config.save();
                 delay(1000);
             }
-            else if ((config.EveSong1Time + 12) == hr && (config.EveSong1Time != 3))
+            else if ((config.EveSong1Time + 12) == bell.hour() && (config.EveSong1Time != 3))
             {
                 myDFPlayer.playFolder(2, config.EveSongNo);
                 delay(1000);
             }
-            else if ((config.EveSong2Time + 12) == hr && (config.EveSong2Time != 3))
+            else if ((config.EveSong2Time + 12) == bell.hour() && (config.EveSong2Time != 3))
             {
                 myDFPlayer.playFolder(4, config.SongOrder);
                 config.SongOrder++;
@@ -1372,6 +1493,7 @@ void PlayChant(short hr)
             appMode = APP_NORMAL_MODE;
             timrLCD = millis();
             digitalWrite(AMP, LOW);
+            
         }
         break;
     }

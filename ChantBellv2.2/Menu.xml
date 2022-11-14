@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<RootMenu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Config IdPrefix="mnuCmd" VarPrefix="sampleMenu" UseNumbering="true" IncludeNumberHierarchy="false" MaxNameLen="15" MenuBackFirstItem="false" BackText="Back" ExitText="Exit" AvrProgMem="true"/>
+  <MenuItems>
+    <Item Id="SetDateTime" Name="SET DATE TIME">
+      <MenuItems>
+        <Item Id="SetDate" Name="SET DATE"/>
+        <Item Id="SetMonth" Name="SET MONTH"/>
+        <Item Id="SetYear" Name="SET YEAR"/>
+        <Item Id="SetHour" Name="SET HRS(0-24)"/>
+        <Item Id="SetMin" Name="SET MINS"/>
+      </MenuItems>
+    </Item>
+    <Item Id="BellSet" Name="BELL SETTING">
+      <MenuItems>
+        <Item Id="StartTime" Name="START TIME"/>
+        <Item Id="EndTime" Name="END TIME"/>
+        <Item Id="SongCount" Name="SONG COUNT"/>
+        <Item Id="BakLitDur" Name="BACKLIGHT DUR"/>
+        <Item Id="Volume" Name="VOLUME"/>
+        <Item Id="PlayDemo" Name="PLAY DEMO">
+          <MenuItems>
+            <Item Id="selectTime" Name="SELECT TIME"/>
+            <Item Id="Play" Name="PLAY"/>
+          </MenuItems>
+        </Item>
+      </MenuItems>
+    </Item>
+  </MenuItems>
+</RootMenu>

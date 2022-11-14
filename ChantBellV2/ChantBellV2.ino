@@ -16,10 +16,10 @@ unsigned long timrAmp, timrLCD, timr_Time, timrMNU;
 SoftwareSerial mySoftwareSerial(2, 3); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-
+short upButPreCount = 0,selButPreCount = 0, downButPreCount = 0;
 // RTC_DS3231 rtc;
 RTC_DS1307 rtc;
-
+DateTime bell;
 //blink time 
 bool blink = true, serviceMode = false;
 
@@ -93,6 +93,7 @@ void setup()
         lcd.clear();
         lcd.print(F("ERR 02"));
         delay(2000);
+        serviceMode = true;
     }
     // Initialize DF Player...............
     if (digitalRead(BACK_BUT))
@@ -115,11 +116,11 @@ void setup()
 void loop()
 {
   //adjust time 
-  if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
-  {
-    delay(10000);
-    rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),2));        
-  }  
+//   if (rtc.now().hour() == 11 && rtc.now().minute() == 18 && rtc.now().second() == 0)
+//   {
+//     delay(10000);
+//     rtc.adjust(DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),rtc.now().hour(),rtc.now().minute(),2));        
+//   }  
     btn = getButton();
     if (btn)
         {
@@ -127,6 +128,12 @@ void loop()
           timrMNU = millis();
           lcd.backlight();
         }
+    if (millis() - timrLCD > 300)
+    {
+        downButPreCount = 0;
+        selButPreCount =0;
+        upButPreCount=0;
+    }
     switch (appMode)
     {
     case APP_NORMAL_MODE:
@@ -135,6 +142,15 @@ void loop()
             appMode = APP_MENU_MODE;
             refreshMenuDisplay(REFRESH_DESCEND);
             timrMNU = millis();
+        }
+        else if (btn == BUTTON_SELECT_PRESSED) {
+          selButPreCount +=1;
+          if (selButPreCount >= 4) 
+          {
+            demoTime = rtc.now().minute() > 30 ? rtc.now().hour() + 1 : rtc.now().hour();
+            appMode = APP_DEMO_MODE;
+            lcd.clear();
+          }          
         }
         else if (btn == BUTTON_UP_LONG_PRESSED)
         {
@@ -150,8 +166,8 @@ void loop()
         }
         if (rtc.now().minute() == 0 && rtc.now().second() == 0 && millis() > timrAmp + 61000L)
         {
-            int hr = rtc.now().hour();
-            if (hr >= config.startTime && hr <= config.endTime) // chek time
+            bell = rtc.now();
+            if (bell.hour() >= config.startTime && bell.hour() <= config.endTime) // chek time
             {
                 digitalWrite(AMP, HIGH);
                 timrAmp = millis();
@@ -214,7 +230,7 @@ void loop()
     }
     case APP_SETMIN_MODE:
     {
-if (millis() - timr_Time > 300)
+    if (millis() - timr_Time > 300)
         {
             if (blink)
             { 
@@ -262,7 +278,7 @@ if (millis() - timr_Time > 300)
         lcd.setCursor(0,1);
         lcd.print("CHANT PLAYING...");
         if (millis() >= timrAmp + ampDelay)
-            PlayChant(rtc.now().hour());
+            PlayChant();
         break;
     }
     case APP_MENU_MODE:
@@ -311,7 +327,7 @@ if (millis() - timr_Time > 300)
     case APP_PROCESS_MENU_CMD:
     {
         byte processingComplete = processMenuCommand(Menu1.getCurrentItemCmdId());
-        if (millis() - timrMNU > 10000)
+        if (millis() - timrMNU > 30000)
         {
           Menu1.reset();
           appMode = APP_NORMAL_MODE;
@@ -336,7 +352,8 @@ if (millis() - timr_Time > 300)
         lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime-12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
         digitalWrite(AMP, HIGH);
         delay(1000);
-        PlayChant(demoTime);
+        bell = DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),demoTime,0,0);
+        PlayChant();
         if (btn == BUTTON_DOWN_PRESSED)
         {
           playSong = 9;
@@ -844,44 +861,84 @@ void refreshMenuDisplay(byte refreshMode)
 }
 
 int n = 1;
-void PlayChant(short hr)
+void PlayChant()
 {
     // Serial.println(String(hr));
-    switch (playSong)
+  switch (playSong)
+  {
+  case 1:                                                             // Temple Name
+   if (digitalRead(STA_PIN))
     {
-    case 1:
-        if (digitalRead(STA_PIN))
-        { 
-          myDFPlayer.playMp3Folder(0);
+         myDFPlayer.playMp3Folder(0);
+        delay(1000);
+        playSong = 2;
+    }
+    break;
+  case 2:
+    if (digitalRead(STA_PIN))                                           // Time
+    {
+      myDFPlayer.playFolder(1, bell.hour());
+      delay(1000);
+      playSong = 3;
+    }
+    break;
+  case 3:                                                               // English Month
+    if (digitalRead(STA_PIN))
+    {
+      myDFPlayer.playFolder(47, bell.month());
+      delay(1000);
+      playSong = 4;
+    }
+    break;
+  case 4:                                                               // Englidh Date
+    if (digitalRead(STA_PIN))
+    {
+        myDFPlayer.playFolder(48, bell.day());
+        delay(1000);
+        playSong = 5;
+    }
+    break;
+  case 5:                                                               // Day of Week
+    if (digitalRead(STA_PIN))
+    {
+        myDFPlayer.playFolder(49, bell.dayOfTheWeek()+1);
+        delay(1000);
+        playSong = 6;
+    }
+    break;
+  case 6:                                                               // Tamil Date
+  if (digitalRead(STA_PIN))
+    {
+      if (bell.hour() == 6 || bell.hour() == 8 || bell.hour() == 10) 
+      {
+        if ( bell.year() == config.DataYear) 
+        {
+            myDFPlayer.playFolder(bell.month() + 50, bell.day());       // current year 
             delay(1000);
-            playSong = 2;
+        } 
+        else if (bell.year() == config.DataYear-1 && bell.month()==12)   // prev year december
+        {
+          myDFPlayer.playFolder(50, bell.day());
+          delay(1000);
         }
-        break;
-        // if (digitalRead(STA_PIN))
-        // {
-        //     myDFPlayer.playFolder(3, n);
-        //     n = ++n > 3 ? 1 : n;
-        //     delay(1000);
-        //     playSong = 2;
-        // }
-        // break;
-    case 2:
+        playSong = 8;
+      }
+      else 
+      {
+        playSong = 8;
+      }
+    }
+    break;
+
+    case 8:
         if (digitalRead(STA_PIN))
         {
-            myDFPlayer.playFolder(1, hr);
-            delay(1000);
-             playSong = 3;
-        }
-        break;
-    case 3:
-        if (digitalRead(STA_PIN))
-        {
-            if (config.MorSong1Time == hr && config.MorSong1Time != 3)
+            if (config.MorSong1Time == bell.hour() && config.MorSong1Time != 3)
             {
-                myDFPlayer.playFolder(2,  config.MorSongNo);
+                myDFPlayer.playFolder(2, config.MorSongNo);
                 delay(1000);
             }
-            else if (config.MorSong2Time == hr && config.MorSong2Time != 3)
+            else if (config.MorSong2Time == bell.hour() && config.MorSong2Time != 3)
             {
                 myDFPlayer.playFolder(4, config.SongOrder);
                 config.SongOrder++;
@@ -890,12 +947,12 @@ void PlayChant(short hr)
                 config.save();
                 delay(1000);
             }
-            else if ((config.EveSong1Time + 12) == hr && (config.EveSong1Time != 3)) 
+            else if ((config.EveSong1Time + 12) == bell.hour() && (config.EveSong1Time != 3))
             {
-                myDFPlayer.playFolder(2,  config.EveSongNo);
+                myDFPlayer.playFolder(2, config.EveSongNo);
                 delay(1000);
             }
-            else if ((config.EveSong2Time + 12) == hr && (config.EveSong2Time != 3))
+            else if ((config.EveSong2Time + 12) == bell.hour() && (config.EveSong2Time != 3))
             {
                 myDFPlayer.playFolder(4, config.SongOrder);
                 config.SongOrder++;
@@ -904,17 +961,16 @@ void PlayChant(short hr)
                 config.save();
                 delay(1000);
             }
-            else 
+            else
             {
-              myDFPlayer.playMp3Folder(config.SlogamOrder);
-              config.SlogamOrder++;
-              if (config.SlogamOrder > config.SlogamCount)
-                  config.SlogamOrder = 1;
-              config.save();
-              delay(1000);
-            } 
+                myDFPlayer.playMp3Folder(config.SlogamOrder);
+                config.SlogamOrder++;
+                if (config.SlogamOrder > config.SlogamCount)
+                    config.SlogamOrder = 1;
+                config.save();
+                delay(1000);
+            }
             playSong = 9;
-            
         }
         break;
     case 9:

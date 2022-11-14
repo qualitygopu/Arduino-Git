@@ -8,7 +8,7 @@
 # 8 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 2
 # 9 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 2
 # 10 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 2
-# 21 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 19 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
 long CurTime;
 byte Light1ON = 0, Light2ON = 0, PlayerONMor = 0, PlayerONEve = 0;
 int ampDelay = 5000;
@@ -21,6 +21,7 @@ short upButPreCount = 0,selButPreCount = 0, downButPreCount = 0;
 // RTC_DS3231 rtc;
 RTC_DS1307 rtc;
 
+DateTime bell;
 //blink time 
 bool blink = true, serviceMode = false;
 
@@ -46,6 +47,16 @@ enum AppModeValues
     APP_SETHR_MODE,
     APP_SETMIN_MODE
 };
+
+enum BlinkMode
+{
+    setHr,
+    setMin,
+    setDate,
+    setMonth,
+    setYear
+};
+byte blinkMode = setHr;
 byte appMode = APP_NORMAL_MODE;
 
 void refreshMenuDisplay(byte refreshMode);
@@ -65,8 +76,6 @@ void setup()
     pinMode(A2, 0x1);
     pinMode(A1, 0x1);
     pinMode(11, 0x1);
-    pinMode(12, 0x1);
-    pinMode(13, 0x1);
     pinMode(5, 0x2);
     pinMode(6, 0x2);
     pinMode(7, 0x2);
@@ -77,23 +86,23 @@ void setup()
     lcd.backlight();
     lcd.setCursor(5, 0);
     lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 88 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 95 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
              (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 88 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 95 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
              "WELCOME"
-# 88 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 95 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
              ); &__c[0];}))
-# 88 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 95 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
              )));
     lcd.setCursor(6, 1);
     lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 97 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
              (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 97 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
              "QTRON"
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 97 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
              ); &__c[0];}))
-# 90 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 97 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
              )));
     delay(2000);
     lcd.clear();
@@ -112,13 +121,13 @@ void setup()
     {
         lcd.clear();
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 107 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 114 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 107 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 114 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  "ERR 01"
-# 107 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 114 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  ); &__c[0];}))
-# 107 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 114 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  ))); // Couldn't find RTC
     }
 
@@ -126,13 +135,13 @@ void setup()
     {
         lcd.clear();
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 113 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 120 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 113 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 120 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  "ERR 02"
-# 113 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 120 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  ); &__c[0];}))
-# 113 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 120 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  )));
         delay(2000);
         serviceMode = true;
@@ -148,13 +157,13 @@ void setup()
         {
             lcd.setCursor(0, 0);
             lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 127 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 134 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                      (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 127 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 134 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                      "ERR 03"
-# 127 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 134 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                      ); &__c[0];}))
-# 127 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 134 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                      )));
         }
         myDFPlayer.setTimeOut(500);
@@ -171,6 +180,7 @@ void setup()
 
     //   rtc.adjust(DateTime(2021,07,18,17,59,57));
 }
+
 void loop()
 {
     btn = getButton();
@@ -189,13 +199,13 @@ void loop()
                 config.AutoPlay = 1;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 168 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 168 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          "  AUTO PLAY ON  "
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 168 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          ); &__c[0];}))
-# 160 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 168 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          )));
             }
             else
@@ -203,13 +213,13 @@ void loop()
                 config.AutoPlay = 0;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 166 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 174 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 166 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 174 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          " AUTO PLAY OFF  "
-# 166 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 174 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          ); &__c[0];}))
-# 166 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 174 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          )));
             }
             digitalWrite(A1, config.AutoPlay);
@@ -228,13 +238,13 @@ void loop()
                 config.AutoLight = 1;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 183 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 191 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 183 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 191 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          " AUTO LIGHT ON  "
-# 183 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 191 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          ); &__c[0];}))
-# 183 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 191 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          )));
             }
             else
@@ -242,13 +252,13 @@ void loop()
                 config.AutoLight = 0;
                 lcd.setCursor(0, 1);
                 lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 189 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 197 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 189 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 197 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          " AUTO LIGHT OFF "
-# 189 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 197 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                          ); &__c[0];}))
-# 189 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 197 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                          )));
             }
             digitalWrite(A2, config.AutoLight);
@@ -272,18 +282,17 @@ void loop()
             Light1ON = !Light1ON;
         }
     }
-    if (millis() - timrLCD > 500)
+    if (millis() - timrLCD > 300)
     {
         downButPreCount = 0;
         selButPreCount =0;
         upButPreCount=0;
     }
 
-    if (millis() - timrTrigger > 1000)
+    if (millis() - timrTrigger > 500 && config.AutoLight)
     {
         timrTrigger = millis();
-        if (config.AutoLight)
-            TriggerLights();
+        TriggerLights();
     }
     digitalWrite(A2, config.AutoLight);
     digitalWrite(A1, config.AutoPlay);
@@ -304,16 +313,17 @@ void loop()
           selButPreCount +=1;
           if (selButPreCount >= 4)
           {
-            demoTime = random(6,18);
+            demoTime = rtc.now().minute() > 30 ? rtc.now().hour() + 1 : rtc.now().hour();
             appMode = APP_DEMO_MODE;
+
             lcd.clear();
           }
         }
 
         if (rtc.now().minute() == 0 && rtc.now().second() == 0 && millis() > timrAmp + 61000L)
         {
-            int hr = rtc.now().hour();
-            if (hr >= config.startTime && hr <= config.endTime) // chek time
+            bell = rtc.now();
+            if (bell.hour() >= config.startTime && bell.hour() <= config.endTime) // chek time
             {
                 digitalWrite(A0, 0x1);
                 timrAmp = millis();
@@ -448,13 +458,17 @@ void loop()
         lcd.setCursor(0, 1);
         lcd.print("CHANT PLAYING...");
         if (millis() >= timrAmp + ampDelay)
-            PlayChant(rtc.now().hour());
+            PlayChant();
         break;
     }
     case APP_MENU_MODE:
     {
-        if (millis() - timrMNU > 10000)
+        if (millis() - timrMNU > 30000)
         {
+            if (!digitalRead(5))
+            {
+                stopPreSong();
+            }
             Menu1.reset();
             appMode = APP_NORMAL_MODE;
             lcd.clear();
@@ -468,6 +482,27 @@ void loop()
             StHr = rtc.now().hour();
             StMin = rtc.now().minute();
         }
+        if (Menu1.getCurrentItemCmdId() == mnuCmdSetTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdLt1OnTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdLt1OffTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrMorOnTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrMorDur ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrEveOnTime ||
+            Menu1.getCurrentItemCmdId() == mnuCmdPlrEveDur)
+        {
+            blinkMode = setHr;
+        }
+        else if (Menu1.getCurrentItemCmdId() == mnuCmdSetDate)
+        {
+            blinkMode = setDate;
+        }
+
+        // if (Menu1.getCurrentItemCmdId() == mnuCmdMorSongNo || Menu1.getCurrentItemCmdId() == mnuCmdEveSongNo)
+        // {
+        //     
+        // }
+
+
         if (btn == (4 | (2 << 6)))
         {
             Menu1.reset();
@@ -478,6 +513,10 @@ void loop()
 
         if (menuMode == MENU_EXIT)
         {
+            if (!digitalRead(5))
+            {
+                stopPreSong();
+            }
             lcd.clear();
             appMode = APP_NORMAL_MODE;
         }
@@ -499,6 +538,10 @@ void loop()
         byte processingComplete = processMenuCommand(Menu1.getCurrentItemCmdId());
         if (millis() - timrMNU > 30000)
         {
+            if (!digitalRead(5))
+            {
+                stopPreSong();
+            }
             Menu1.reset();
             appMode = APP_NORMAL_MODE;
             lcd.clear();
@@ -518,19 +561,20 @@ void loop()
     {
         lcd.setCursor(0, 0);
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 457 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 498 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 457 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 498 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  "  RUNNING DEMO  "
-# 457 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 498 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  ); &__c[0];}))
-# 457 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 498 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  )));
         lcd.setCursor(0, 1);
         lcd.print("DEMO TIME : " + String(demoTime > 12 ? demoTime - 12 : demoTime) + String(demoTime >= 12 ? "PM" : "AM"));
         digitalWrite(A0, 0x1);
         delay(1000);
-        PlayChant(demoTime);
+        bell = DateTime(rtc.now().year(),rtc.now().month(),rtc.now().day(),demoTime,0,0);
+        PlayChant();
         if (btn == (3 | (0 << 6)))
         {
             playSong = 9;
@@ -556,13 +600,13 @@ void loop()
         }
         lcd.setCursor(0, 1);
         lcd.print((reinterpret_cast<const __FlashStringHelper *>(
-# 487 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 529 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 487 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 529 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  " PLAYER MODE ON "
-# 487 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+# 529 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
                  ); &__c[0];}))
-# 487 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+# 529 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
                  )));
         if (btn == (2 | (0 << 6)))
         {
@@ -624,49 +668,9 @@ void TriggerLights()
             }
         }
     }
-    // Validate Light 2
-    if (config.Light2On != 0 && config.Light2Off != 0)
-    {
-        if (config.Light2Off > config.Light2On)
-        {
-            if (CurTime >= config.Light2On && CurTime < config.Light2Off)
-            {
-                if (Light2ON == 0)
-                {
-                    digitalWrite(12, 0x1);
-                    Light2ON = 1;
-                }
-            }
-            else
-            {
-                if (Light2ON == 1)
-                {
-                    digitalWrite(12, 0x0);
-                    Light2ON = 0;
-                }
-            }
-        }
-        else
-        {
-            if (CurTime < config.Light2On && CurTime >= config.Light2Off)
-            {
-                if (Light2ON == 1)
-                {
-                    digitalWrite(12, 0x0);
-                    Light2ON = 0;
-                }
-            }
-            else
-            {
-                if (Light2ON == 0)
-                {
-                    digitalWrite(12, 0x1);
-                    Light2ON = 1;
-                }
-            }
-        }
-    }
+
 }
+
 void TriggerPlayer()
 {
     // Validate Player Morning
@@ -736,117 +740,85 @@ byte processMenuCommand(byte cmdId)
     byte complete = false; // set to true when menu command processing complete.
     byte configChanged = false;
 
-    if (btn == (1 | (0 << 6)) /*1*/)
-    {
-        complete = true;
-    }
+    // if (btn == BUTTON_SELECT_PRESSED)
+    // {
+    //     complete = true;
+    // }
+
     switch (cmdId)
     {
     case mnuCmdSetDate:
     {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
+        if (btn == (2 | (0 << 6)))
         {
-            StDate = ++StDate > 31 ? 1 : StDate;
+            if (blinkMode == setDate)
+                StDate = ++StDate > 31 ? 1 : StDate;
+            else if (blinkMode == setMonth)
+                StMonth = ++StMonth > 12 ? 1 : StMonth;
+            else if (blinkMode == setYear)
+                StYear = ++StYear > 2050 ? 2020 : StYear;
+
         }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
+        else if (btn == (3 | (0 << 6)))
         {
-            StDate = --StDate < 1 ? 31 : StDate;
+            if (blinkMode == setDate)
+                StDate = --StDate < 1 ? 31 : StDate;
+            else if (blinkMode == setMonth)
+                StMonth = --StMonth < 1 ? 12 : StMonth;
+            else if (blinkMode == setYear)
+                StYear = --StYear < 2050 ? 2020 : StYear;
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setDate)
+            {
+                blinkMode = setMonth;
+            }
+            else if (blinkMode == setMonth)
+            {
+                blinkMode = setYear;
+            }
+            else if (blinkMode == setYear)
+            {
+                rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdSetMonth:
+    case mnuCmdSetTime:
     {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
+        if (btn == (2 | (0 << 6)))
         {
-            StMonth = ++StMonth > 12 ? 1 : StMonth;
+            if (blinkMode == setHr)
+                StHr = ++StHr > 23 ? 0 : StHr;
+            else if (blinkMode == setMin)
+                StMin = ++StMin > 59 ? 0 : StMin;
         }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
+        else if (btn == (3 | (0 << 6)))
         {
-            StMonth = --StMonth < 1 ? 12 : StMonth;
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdSetYear:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            StYear = ++StYear > 2050 ? 1 : StYear;
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            StYear = --StYear < 1 ? 2020 : StYear;
+            if (blinkMode == setHr)
+                StHr = --StHr < 0 ? 23 : StHr;
+            else if (blinkMode == setMin)
+                StMin = --StMin < 0 ? 59 : StMin;
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdSetHour:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            StHr = ++StHr > 23 ? 0 : StHr;
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            StHr = --StHr < 0 ? 23 : StHr;
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdSetMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            StMin = ++StMin > 59 ? 0 : StMin;
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            StMin = --StMin < 0 ? 59 : StMin;
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            rtc.adjust(DateTime(StYear, StMonth, StDate, StHr, StMin, 0));
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
+
     case mnuCmdStartTime:
     {
         configChanged = true;
@@ -861,6 +833,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -882,6 +855,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -903,6 +877,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -924,6 +899,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -946,6 +922,7 @@ byte processMenuCommand(byte cmdId)
         {
             config.save();
             myDFPlayer.volume(config.vol);
+            complete = true;
         }
         else
         {
@@ -963,6 +940,10 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
         {
             demoTime = --demoTime < 4 ? 23 : demoTime;
+        }
+        else if (btn == (1 | (0 << 6)) /*1*/)
+        {
+            complete = true;
         }
         else
         {
@@ -991,6 +972,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -1012,6 +994,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -1033,6 +1016,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -1054,6 +1038,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -1075,6 +1060,7 @@ byte processMenuCommand(byte cmdId)
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
             config.save();
+            complete = true;
         }
         else
         {
@@ -1088,14 +1074,18 @@ byte processMenuCommand(byte cmdId)
         if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
         {
             config.MorSongNo = ++config.MorSongNo > 20 ? 1 : config.MorSongNo;
+            startPreSong(2,config.MorSongNo);
         }
         else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
         {
             config.MorSongNo = --config.MorSongNo < 1 ? 20 : config.MorSongNo;
+            startPreSong(2,config.MorSongNo);
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
+            stopPreSong();
             config.save();
+            complete = true;
         }
         else
         {
@@ -1109,98 +1099,18 @@ byte processMenuCommand(byte cmdId)
         if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
         {
             config.EveSongNo = ++config.EveSongNo > 20 ? 1 : config.EveSongNo;
+            startPreSong(2,config.EveSongNo);
         }
         else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
         {
             config.EveSongNo = --config.EveSongNo < 1 ? 20 : config.EveSongNo;
+            startPreSong(2,config.EveSongNo);
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
+            stopPreSong();
             config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OnHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1On = addToTime(60, config.Light1On);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1On = addToTime(-60, config.Light1On);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OnMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1On = addToTime(1, config.Light1On);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1On = addToTime(-1, config.Light1On);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffHr:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(60, config.Light1Off);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(-60, config.Light1Off);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdLt1OffMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(1, config.Light1Off);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.Light1Off = addToTime(-1, config.Light1Off);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
+            complete = true;
         }
         else
         {
@@ -1209,129 +1119,190 @@ byte processMenuCommand(byte cmdId)
         break;
     }
 
-    case mnuCmdPlrMorHr:
+    case mnuCmdLt1OnTime:
     {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
+        if (btn == (2 | (0 << 6)))
         {
-            config.PlayerMorTime = addToTime(60, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.Light1On = addToTime(60, config.Light1On);
+            else if (blinkMode == setMin)
+                config.Light1On = addToTime(1, config.Light1On);
         }
         else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
         {
-            config.PlayerMorTime = addToTime(-60, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.Light1On = addToTime(-60, config.Light1On);
+            else if (blinkMode == setMin)
+                config.Light1On = addToTime(-1, config.Light1On);
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
-            config.save();
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
-        else
+
+        break;
+    }
+    case mnuCmdLt1OffTime:
+    {
+        if (btn == (2 | (0 << 6)))
         {
-            configChanged = false;
+            if (blinkMode == setHr)
+                config.Light1Off = addToTime(60, config.Light1Off);
+            else if (blinkMode == setMin)
+                config.Light1Off = addToTime(1, config.Light1Off);
+        }
+        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
+        {
+            if (blinkMode == setHr)
+                config.Light1Off = addToTime(-60, config.Light1Off);
+            else if (blinkMode == setMin)
+                config.Light1Off = addToTime(-1, config.Light1Off);
+        }
+        else if (btn == (1 | (0 << 6)) /*1*/)
+        {
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdPlrMorMin:
+    case mnuCmdPlrMorOnTime:
     {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
+        if (btn == (2 | (0 << 6)))
         {
-            config.PlayerMorTime = addToTime(1, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.PlayerMorTime = addToTime(60, config.PlayerMorTime);
+            else if (blinkMode == setMin)
+                config.PlayerMorTime = addToTime(1, config.PlayerMorTime);
         }
         else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
         {
-            config.PlayerMorTime = addToTime(-1, config.PlayerMorTime);
+            if (blinkMode == setHr)
+                config.PlayerMorTime = addToTime(-60, config.PlayerMorTime);
+            else if (blinkMode == setMin)
+                config.PlayerMorTime = addToTime(-1, config.PlayerMorTime);
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
     case mnuCmdPlrMorDur:
     {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
+        if (btn == (2 | (0 << 6)))
         {
-            config.PlayerMorDur = addToTime(5, config.PlayerMorDur);
+            if (blinkMode == setHr)
+                config.PlayerMorDur = addToTime(60, config.PlayerMorDur);
+            else if (blinkMode == setMin)
+                config.PlayerMorDur = addToTime(5, config.PlayerMorDur);
         }
         else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
         {
-            config.PlayerMorDur = addToTime(-5, config.PlayerMorDur);
+            if (blinkMode == setHr)
+                config.PlayerMorDur = addToTime(-60, config.PlayerMorDur);
+            else if (blinkMode == setMin)
+                config.PlayerMorDur = addToTime(-5, config.PlayerMorDur);
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
-    case mnuCmdPlrEveHr:
+    case mnuCmdPlrEveOnTime:
     {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
+        if (btn == (2 | (0 << 6)))
         {
-            config.PlayerEveTime = addToTime(60, config.PlayerEveTime);
+            if (blinkMode == setHr)
+                config.PlayerEveTime = addToTime(60, config.PlayerEveTime);
+            else if (blinkMode == setMin)
+                config.PlayerEveTime = addToTime(1, config.PlayerEveTime);
         }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
+        else if (btn == (3 | (0 << 6)))
         {
-            config.PlayerEveTime = addToTime(-60, config.PlayerEveTime);
+            if (blinkMode == setHr)
+                config.PlayerEveTime = addToTime(-60, config.PlayerEveTime);
+            else if (blinkMode == setMin)
+                config.PlayerEveTime = addToTime(-1, config.PlayerEveTime);
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
-        }
-        break;
-    }
-    case mnuCmdPlrEveMin:
-    {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
-        {
-            config.PlayerEveTime = addToTime(1, config.PlayerEveTime);
-        }
-        else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
-        {
-            config.PlayerEveTime = addToTime(-1, config.PlayerEveTime);
-        }
-        else if (btn == (1 | (0 << 6)) /*1*/)
-        {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
     case mnuCmdPlrEveDur:
     {
-        configChanged = true;
-        if (btn == (2 | (0 << 6)) || btn == (2 | (2 << 6)))
+        if (btn == (2 | (0 << 6)))
         {
-            config.PlayerEveDur = addToTime(5, config.PlayerEveDur);
+            if (blinkMode == setHr)
+                config.PlayerEveDur = addToTime(60, config.PlayerEveDur);
+            else if (blinkMode == setMin)
+                config.PlayerEveDur = addToTime(5, config.PlayerEveDur);
         }
         else if (btn == (3 | (0 << 6)) || btn == (3 | (2 << 6)))
         {
-            config.PlayerEveDur = addToTime(-5, config.PlayerEveDur);
+            if (blinkMode == setHr)
+                config.PlayerEveDur = addToTime(-60, config.PlayerEveDur);
+            else if (blinkMode == setMin)
+                config.PlayerEveDur = addToTime(-5, config.PlayerEveDur);
         }
         else if (btn == (1 | (0 << 6)) /*1*/)
         {
-            config.save();
-        }
-        else
-        {
-            configChanged = false;
+            if (blinkMode == setHr)
+            {
+                blinkMode = setMin;
+            }
+            else if (blinkMode == setMin)
+            {
+                config.save();
+                complete = true;
+                blink = true;
+            }
         }
         break;
     }
@@ -1350,10 +1321,75 @@ byte processMenuCommand(byte cmdId)
         break;
     }
     }
-    if (configChanged)
+
+    if (btn == (4 | (1 << 6)) || complete )
+    {
+        complete = true;
+        lcd.setCursor(1, 1);
+        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+    }
+    else if (configChanged)
     {
         lcd.setCursor(1, 1);
-        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId))); // Display config value.
+        lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+    }
+    else
+    {
+        if (millis() - timr_Time > 300)
+        {
+            if (blink)
+            {
+                lcd.setCursor(1, 1);
+                lcd.print(rpad(strbuf, config.getFormattedStr(cmdId)));
+                blink = false;
+            }
+            else
+            {
+                if (cmdId == mnuCmdSetTime ||
+                    cmdId == mnuCmdLt1OnTime ||
+                    cmdId == mnuCmdLt1OffTime ||
+                    cmdId == mnuCmdPlrMorOnTime ||
+                    cmdId == mnuCmdPlrMorDur ||
+                    cmdId == mnuCmdPlrEveOnTime ||
+                    cmdId == mnuCmdPlrEveDur)
+                {
+                    if (blinkMode == setHr)
+                        lcd.setCursor(1,1);
+                    if (blinkMode == setMin)
+                        lcd.setCursor(4,1);
+                    lcd.print((reinterpret_cast<const __FlashStringHelper *>(
+# 1279 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+                             (__extension__({static const char __c[] __attribute__((__progmem__)) = (
+# 1279 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+                             "  "
+# 1279 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+                             ); &__c[0];}))
+# 1279 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+                             )));
+                    blink = true;
+                }
+                else if (cmdId == mnuCmdSetDate)
+                {
+                    if (blinkMode == setDate)
+                        lcd.setCursor(1,1);
+                    if (blinkMode == setMonth)
+                        lcd.setCursor(4,1);
+                    if (blinkMode == setYear)
+                        lcd.setCursor(9,1);
+                    lcd.print((reinterpret_cast<const __FlashStringHelper *>(
+# 1290 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+                             (__extension__({static const char __c[] __attribute__((__progmem__)) = (
+# 1290 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+                             "  "
+# 1290 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino" 3
+                             ); &__c[0];}))
+# 1290 "e:\\Arduino\\Arduino Git\\ChantBellV3SingleLight\\ChantBellV3SingleLight.ino"
+                             )));
+                    blink = true;
+                }
+            }
+            timr_Time = millis();
+        }
     }
     return complete;
 }
@@ -1422,37 +1458,96 @@ void refreshMenuDisplay(byte refreshMode)
     }
 }
 
+void startPreSong(byte fol, byte song)
+{
+    digitalWrite(A0, 0x1);
+    myDFPlayer.playFolder(fol, song);
+    delay(500);
+}
+void stopPreSong()
+{
+    digitalWrite(A0, 0x0);
+    myDFPlayer.stop();
+}
 int n = 1;
-void PlayChant(short hr)
+void PlayChant()
 {
     // Serial.println(String(hr));
-    switch (playSong)
+  switch (playSong)
+  {
+  case 1: // Temple Name
+   if (digitalRead(5))
     {
-    case 1:
-        if (digitalRead(5))
+         myDFPlayer.playMp3Folder(0);
+        delay(1000);
+        playSong = 2;
+    }
+    break;
+  case 2:
+    if (digitalRead(5)) // Time
+    {
+      myDFPlayer.playFolder(1, bell.hour());
+      delay(1000);
+      playSong = 3;
+    }
+    break;
+  case 3: // English Month
+    if (digitalRead(5))
+    {
+      myDFPlayer.playFolder(47, bell.month());
+      delay(1000);
+      playSong = 4;
+    }
+    break;
+  case 4: // Englidh Date
+    if (digitalRead(5))
+    {
+        myDFPlayer.playFolder(48, bell.day());
+        delay(1000);
+        playSong = 5;
+    }
+    break;
+  case 5: // Day of Week
+    if (digitalRead(5))
+    {
+        myDFPlayer.playFolder(49, bell.dayOfTheWeek()+1);
+        delay(1000);
+        playSong = 6;
+    }
+    break;
+  case 6: // Tamil Date
+  if (digitalRead(5))
+    {
+      if (bell.hour() == 6 || bell.hour() == 8 || bell.hour() == 10)
+      {
+        if ( bell.year() == config.DataYear)
         {
-            myDFPlayer.playMp3Folder(0);
+            myDFPlayer.playFolder(bell.month() + 50, bell.day()); // current year 
             delay(1000);
-            playSong = 2;
         }
-        break;
-    case 2:
+        else if (bell.year() == config.DataYear-1 && bell.month()==12) // prev year december
+        {
+          myDFPlayer.playFolder(50, bell.day());
+          delay(1000);
+        }
+        playSong = 8;
+      }
+      else
+      {
+        playSong = 8;
+      }
+    }
+    break;
+
+    case 8:
         if (digitalRead(5))
         {
-            myDFPlayer.playFolder(1, hr);
-            delay(1000);
-            playSong = 3;
-        }
-        break;
-    case 3:
-        if (digitalRead(5))
-        {
-            if (config.MorSong1Time == hr && config.MorSong1Time != 3)
+            if (config.MorSong1Time == bell.hour() && config.MorSong1Time != 3)
             {
                 myDFPlayer.playFolder(2, config.MorSongNo);
                 delay(1000);
             }
-            else if (config.MorSong2Time == hr && config.MorSong2Time != 3)
+            else if (config.MorSong2Time == bell.hour() && config.MorSong2Time != 3)
             {
                 myDFPlayer.playFolder(4, config.SongOrder);
                 config.SongOrder++;
@@ -1461,12 +1556,12 @@ void PlayChant(short hr)
                 config.save();
                 delay(1000);
             }
-            else if ((config.EveSong1Time + 12) == hr && (config.EveSong1Time != 3))
+            else if ((config.EveSong1Time + 12) == bell.hour() && (config.EveSong1Time != 3))
             {
                 myDFPlayer.playFolder(2, config.EveSongNo);
                 delay(1000);
             }
-            else if ((config.EveSong2Time + 12) == hr && (config.EveSong2Time != 3))
+            else if ((config.EveSong2Time + 12) == bell.hour() && (config.EveSong2Time != 3))
             {
                 myDFPlayer.playFolder(4, config.SongOrder);
                 config.SongOrder++;
@@ -1495,6 +1590,7 @@ void PlayChant(short hr)
             appMode = APP_NORMAL_MODE;
             timrLCD = millis();
             digitalWrite(A0, 0x0);
+
         }
         break;
     }
